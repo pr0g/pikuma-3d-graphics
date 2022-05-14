@@ -14,7 +14,6 @@ BraceWrapping:
     AfterStruct: true
     AfterClass: true
     AfterEnum: true
-    AfterFunction: true
     SplitEmptyFunction: true
     SplitEmptyRecord: true
 ColumnLimit: 80
