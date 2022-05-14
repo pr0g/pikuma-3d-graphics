@@ -26,3 +26,9 @@ target_compile_options(
           -Wextra
           -pedantic>)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2::SDL2main)
+
+add_custom_target(
+  run
+  COMMAND ${PROJECT_NAME}
+  DEPENDS ${PROJECT_NAME}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
