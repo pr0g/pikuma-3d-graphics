@@ -1,24 +1,14 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "math-types.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Texture;
-
-typedef struct {
-  int x;
-  int y;
-} point2_t;
-
-typedef struct {
-  int x;
-  int y;
-  int width;
-  int height;
-} rect_t;
 
 bool initialize_window(void);
 void deinitialize_window(void);

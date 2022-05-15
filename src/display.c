@@ -72,8 +72,8 @@ void draw_grid(const int spacing, const int32_t color) {
 }
 
 void draw_rect(const rect_t* rect, const int32_t color) {
-  for (int y = rect->y; y < rect->y + rect->height; ++y) {
-    for (int x = rect->x; x < rect->x + rect->width; ++x) {
+  for (int y = rect->pos.y; y < rect->pos.y + rect->height; ++y) {
+    for (int x = rect->pos.x; x < rect->pos.x + rect->width; ++x) {
       s_color_buffer[y * s_window_width + x] = color;
     }
   }
