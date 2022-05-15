@@ -51,7 +51,7 @@ bool initialize_window(void) {
 
 void draw_pixel(const point2_t* point, const int32_t color) {
   if (
-    point->x < 0 || point->y >= s_window_width || point->y <= 0
+    point->x < 0 || point->x >= s_window_width || point->y <= 0
     || point->y >= s_window_height) {
     return;
   }
