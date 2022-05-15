@@ -15,6 +15,14 @@ SDL_Texture* color_buffer_texture = NULL;
 int window_width = 800;
 int window_height = 600;
 
+typedef struct
+{
+  int x;
+  int y;
+  int width;
+  int height;
+} rect_t;
+
 bool initialize_window(void) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL.\n");
@@ -93,6 +101,14 @@ void draw_grid(const int spacing, const int32_t color) {
   }
 }
 
+void draw_rect(const rect_t* rect, int32_t color) {
+  for (int y = rect->y; y < rect->y + rect->height; ++y) {
+    for (int x = rect->x; x < rect->x + rect->width; ++x) {
+      color_buffer[y * window_width + x] = color;
+    }
+  }
+}
+
 void clear_color_buffer(const uint32_t color) {
   for (int col = 0; col < window_width; ++col) {
     for (int row = 0; row < window_height; ++row) {
@@ -112,6 +128,8 @@ void render(void) {
   SDL_RenderClear(renderer);
 
   draw_grid(10, 0xff444444);
+  draw_rect(
+    &(rect_t){.x = 60, .y = 50, .width = 100, .height = 80}, 0xffff0000);
 
   render_color_buffer();
   clear_color_buffer(0xff000000);
