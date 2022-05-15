@@ -31,6 +31,7 @@ void render(void) {
   draw_grid(10, 0xff444444);
   draw_rect(
     &(rect_t){.x = 60, .y = 50, .width = 100, .height = 80}, 0xffff0000);
+  draw_pixel(&(point2_t){.x = 100, .y = 200}, 0xffffffff);
 
   render_color_buffer();
   clear_color_buffer(0xff000000);

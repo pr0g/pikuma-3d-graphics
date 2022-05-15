@@ -49,6 +49,15 @@ bool initialize_window(void) {
   return true;
 }
 
+void draw_pixel(const point2_t* point, const int32_t color) {
+  if (
+    point->x < 0 || point->y >= s_window_width || point->y <= 0
+    || point->y >= s_window_height) {
+    return;
+  }
+  s_color_buffer[point->y * s_window_width + point->x] = color;
+}
+
 void draw_grid(const int spacing, const int32_t color) {
   for (int grid_col = 0; grid_col < s_window_width; grid_col += spacing) {
     for (int row = 0; row < s_window_height; ++row) {
@@ -62,7 +71,7 @@ void draw_grid(const int spacing, const int32_t color) {
   }
 }
 
-void draw_rect(const rect_t* rect, int32_t color) {
+void draw_rect(const rect_t* rect, const int32_t color) {
   for (int y = rect->y; y < rect->y + rect->height; ++y) {
     for (int x = rect->x; x < rect->x + rect->width; ++x) {
       s_color_buffer[y * s_window_width + x] = color;
