@@ -1,5 +1,7 @@
 #include "display.h"
 
+#include "math-types.h"
+
 #include <SDL.h>
 
 #include <stdio.h>
@@ -49,7 +51,7 @@ bool initialize_window(void) {
   return true;
 }
 
-void draw_pixel(const point2_t* point, const int32_t color) {
+void draw_pixel(const point2i_t* point, const int32_t color) {
   if (
     point->x < 0 || point->x >= s_window_width || point->y <= 0
     || point->y >= s_window_height) {
@@ -72,8 +74,8 @@ void draw_grid(const int spacing, const int32_t color) {
 }
 
 void draw_rect(const rect_t* rect, const int32_t color) {
-  for (int y = rect->pos.y; y < rect->pos.y + rect->height; ++y) {
-    for (int x = rect->pos.x; x < rect->pos.x + rect->width; ++x) {
+  for (int y = rect->pos.y; y < rect->pos.y + rect->size.height; ++y) {
+    for (int x = rect->pos.x; x < rect->pos.x + rect->size.width; ++x) {
       s_color_buffer[y * s_window_width + x] = color;
     }
   }

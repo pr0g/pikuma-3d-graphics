@@ -1,6 +1,7 @@
 #include <SDL.h>
 
 #include "display.h"
+#include "math-types.h"
 
 void setup(void) {
   create_color_buffer();
@@ -30,9 +31,10 @@ void render(void) {
 
   draw_grid(10, 0xff444444);
   draw_rect(
-    &(rect_t){(point2_t){.x = 60, .y = 50}, .width = 100, .height = 80},
+    &(rect_t){
+      (point2i_t){.x = 60, .y = 50}, (size2i_t){.width = 100, .height = 80}},
     0xffff0000);
-  draw_pixel(&(point2_t){.x = 100, .y = 200}, 0xffffffff);
+  draw_pixel(&(point2i_t){.x = 100, .y = 200}, 0xffffffff);
 
   render_color_buffer();
   clear_color_buffer(0xff000000);
