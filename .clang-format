@@ -10,10 +10,6 @@ BinPackArguments: false
 BinPackParameters: false
 BreakBeforeBraces: Custom
 BraceWrapping:
-    AfterNamespace: true
-    AfterStruct: true
-    AfterClass: true
-    AfterEnum: true
     SplitEmptyFunction: true
     SplitEmptyRecord: true
 ColumnLimit: 80
