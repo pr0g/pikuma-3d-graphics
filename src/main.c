@@ -80,6 +80,19 @@ bool process_input(void) {
 void update(void) {
 }
 
+void draw_grid(void) {
+  for (int grid_col = 0; grid_col < window_width; grid_col += 10) {
+    for (int row = 0; row < window_height; ++row) {
+      color_buffer[row * window_width + grid_col] = 0xff000000;
+    }
+  }
+  for (int col = 0; col < window_width; ++col) {
+    for (int grid_row = 0; grid_row < window_height; grid_row += 10) {
+      color_buffer[grid_row * window_width + col] = 0xff000000;
+    }
+  }
+}
+
 void clear_color_buffer(const uint32_t color) {
   for (int col = 0; col < window_width; ++col) {
     for (int row = 0; row < window_height; ++row) {
@@ -97,6 +110,8 @@ void render_color_buffer(void) {
 void render(void) {
   SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
   SDL_RenderClear(renderer);
+
+  draw_grid();
 
   render_color_buffer();
   clear_color_buffer(0xffffff00);
