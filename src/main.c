@@ -3,14 +3,16 @@
 #include "display.h"
 #include "math-types.h"
 
-const int g_cube_dimension = 10;
+const int g_cube_dimension = 9;
 const int g_cube_point_count =
   g_cube_dimension * g_cube_dimension * g_cube_dimension;
 point3f_t g_cube_points[g_cube_point_count];
 point2f_t g_projected_cube_points[g_cube_point_count];
 
+point3f_t camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
+
 void setup_cube_points(void) {
-  const float step_size = 2.0f / g_cube_dimension;
+  const float step_size = 2.0f / (g_cube_dimension - 1);
   float y_offset = -1.0f;
   for (int y = 0; y < g_cube_dimension; ++y) {
     float z_offset = -1.0f;
@@ -50,14 +52,16 @@ bool process_input(void) {
 }
 
 point2f_t project(point3f_t point, const float fov) {
-  point2f_t projected_point = {.x = fov * point.x, .y = fov * point.y};
+  point2f_t projected_point = {
+    .x = (fov * point.x) / point.z, .y = (fov * point.y) / point.z};
   return projected_point;
 }
 
 void update(void) {
   for (int i = 0; i < g_cube_point_count; ++i) {
-    const point3f_t point = g_cube_points[i];
-    g_projected_cube_points[i] = project(point, 128.0f);
+    point3f_t point = g_cube_points[i];
+    point.z -= camera_position.z;
+    g_projected_cube_points[i] = project(point, 1024.0f);
   }
 }
 
