@@ -12,7 +12,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL2)
 
 add_executable(${PROJECT_NAME})
-target_sources(${PROJECT_NAME} PRIVATE src/main.c src/display.c)
+target_sources(${PROJECT_NAME} PRIVATE src/main.c src/display.c
+                                       src/math-types.c)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 target_compile_options(
   ${PROJECT_NAME}

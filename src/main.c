@@ -59,8 +59,8 @@ point2f_t project(point3f_t point, const float fov) {
 
 void update(void) {
   for (int i = 0; i < g_cube_point_count; ++i) {
-    point3f_t point = g_cube_points[i];
-    point.z -= camera_position.z;
+    const point3f_t point = point3f_sub_vec3f(
+      g_cube_points[i], (vec3f_t){0.0f, 0.0f, camera_position.z});
     g_projected_cube_points[i] = project(point, 1024.0f);
   }
 }
