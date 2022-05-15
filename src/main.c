@@ -80,15 +80,15 @@ bool process_input(void) {
 void update(void) {
 }
 
-void draw_grid(void) {
-  for (int grid_col = 0; grid_col < window_width; grid_col += 10) {
+void draw_grid(const int spacing, const int32_t color) {
+  for (int grid_col = 0; grid_col < window_width; grid_col += spacing) {
     for (int row = 0; row < window_height; ++row) {
-      color_buffer[row * window_width + grid_col] = 0xff000000;
+      color_buffer[row * window_width + grid_col] = color;
     }
   }
   for (int col = 0; col < window_width; ++col) {
-    for (int grid_row = 0; grid_row < window_height; grid_row += 10) {
-      color_buffer[grid_row * window_width + col] = 0xff000000;
+    for (int grid_row = 0; grid_row < window_height; grid_row += spacing) {
+      color_buffer[grid_row * window_width + col] = color;
     }
   }
 }
@@ -111,10 +111,10 @@ void render(void) {
   SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
   SDL_RenderClear(renderer);
 
-  draw_grid();
+  draw_grid(10, 0xff444444);
 
   render_color_buffer();
-  clear_color_buffer(0xffffff00);
+  clear_color_buffer(0xff000000);
 
   SDL_RenderPresent(renderer);
 }
