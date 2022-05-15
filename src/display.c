@@ -76,7 +76,7 @@ void draw_grid(const int spacing, const int32_t color) {
 void draw_rect(const rect_t* rect, const int32_t color) {
   for (int y = rect->pos.y; y < rect->pos.y + rect->size.height; ++y) {
     for (int x = rect->pos.x; x < rect->pos.x + rect->size.width; ++x) {
-      s_color_buffer[y * s_window_width + x] = color;
+      draw_pixel(&(point2i_t){x, y}, color);
     }
   }
 }
@@ -126,4 +126,12 @@ void renderer_clear(void) {
 
 void renderer_present(void) {
   SDL_RenderPresent(s_renderer);
+}
+
+int window_width(void) {
+  return s_window_width;
+}
+
+int window_height(void) {
+  return s_window_height;
 }

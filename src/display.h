@@ -27,4 +27,7 @@ void clear_color_buffer(const uint32_t color);
 void renderer_clear(void);
 void renderer_present(void);
 
+int window_width(void);
+int window_height(void);
+
 #endif // DISPLAY_H

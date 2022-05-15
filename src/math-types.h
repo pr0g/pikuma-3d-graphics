@@ -17,10 +17,33 @@ typedef struct vec2i_t {
   int y;
 } vec2i_t;
 
+typedef struct vec3i_t {
+  int x;
+  int y;
+  int z;
+} vec3i_t;
+
+typedef struct point2f_t {
+  float x;
+  float y;
+} point2f_t;
+
+typedef struct point3f_t {
+  float x;
+  float y;
+  float z;
+} point3f_t;
+
 typedef struct point2i_t {
   int x;
   int y;
 } point2i_t;
+
+typedef struct point3i_t {
+  int x;
+  int y;
+  int z;
+} point3i_t;
 
 typedef struct size2i_t {
   int width;
