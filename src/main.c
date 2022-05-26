@@ -10,6 +10,7 @@ point3f_t g_cube_points[g_cube_point_count];
 point2f_t g_projected_cube_points[g_cube_point_count];
 
 point3f_t camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
+vec3f_t cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 
 void setup_cube_points(void) {
   const float step_size = 2.0f / (g_cube_dimension - 1);
@@ -58,10 +59,18 @@ point2f_t project(point3f_t point, const float fov) {
 }
 
 void update(void) {
+  cube_rotation.x += 0.005f;
+  cube_rotation.y += 0.005f;
+  cube_rotation.z += 0.005f;
   for (int i = 0; i < g_cube_point_count; ++i) {
-    const point3f_t point = point3f_sub_vec3f(
-      g_cube_points[i], (vec3f_t){0.0f, 0.0f, camera_position.z});
-    g_projected_cube_points[i] = project(point, 1024.0f);
+    const point3f_t point = g_cube_points[i];
+    const point3f_t rotated_point = point3f_rotate_z(
+      point3f_rotate_y(
+        point3f_rotate_x(point, cube_rotation.x), cube_rotation.y),
+      cube_rotation.z);
+    const point3f_t transformed_point = point3f_sub_vec3f(
+      rotated_point, (vec3f_t){0.0f, 0.0f, camera_position.z});
+    g_projected_cube_points[i] = project(transformed_point, 1024.0f);
   }
 }
 
