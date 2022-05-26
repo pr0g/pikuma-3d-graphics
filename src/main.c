@@ -12,6 +12,8 @@ point2f_t g_projected_cube_points[g_cube_point_count];
 point3f_t camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
 vec3f_t cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 
+int32_t g_previous_frame_time = 0;
+
 void setup_cube_points(void) {
   const float step_size = 2.0f / (g_cube_dimension - 1);
   float y_offset = -1.0f;
@@ -59,9 +61,20 @@ point2f_t project(point3f_t point, const float fov) {
 }
 
 void update(void) {
-  cube_rotation.x += 0.005f;
-  cube_rotation.y += 0.005f;
-  cube_rotation.z += 0.005f;
+  int32_t current_frame_time;
+  for (;;) {
+    current_frame_time = SDL_GetTicks();
+    if (SDL_TICKS_PASSED(
+          current_frame_time, g_previous_frame_time + frame_target_time())) {
+      break;
+    }
+  }
+
+  g_previous_frame_time = current_frame_time;
+
+  cube_rotation.x += 0.01f;
+  cube_rotation.y += 0.01f;
+  cube_rotation.z += 0.01f;
   for (int i = 0; i < g_cube_point_count; ++i) {
     const point3f_t point = g_cube_points[i];
     const point3f_t rotated_point = point3f_rotate_z(

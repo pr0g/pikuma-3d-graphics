@@ -15,6 +15,14 @@ static struct SDL_Texture* s_color_buffer_texture = NULL;
 static int s_window_width = 800;
 static int s_window_height = 600;
 
+int32_t fps(void) {
+  return 30;
+}
+
+int32_t frame_target_time(void) {
+  return 1000 / fps();
+}
+
 bool initialize_window(void) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL.\n");

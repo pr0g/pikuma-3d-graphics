@@ -11,6 +11,9 @@ struct SDL_Texture;
 struct point2i_t;
 struct rect_t;
 
+int32_t fps(void);
+int32_t frame_target_time(void);
+
 bool initialize_window(void);
 void deinitialize_window(void);
 
