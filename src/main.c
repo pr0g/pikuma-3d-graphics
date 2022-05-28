@@ -1,7 +1,10 @@
 #include <SDL.h>
 
 #include "display.h"
+#include "fps.h"
 #include "math-types.h"
+
+#include <assert.h>
 
 const int g_cube_dimension = 9;
 const int g_cube_point_count =
@@ -9,10 +12,12 @@ const int g_cube_point_count =
 point3f_t g_cube_points[g_cube_point_count];
 point2f_t g_projected_cube_points[g_cube_point_count];
 
-point3f_t camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
-vec3f_t cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
+point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
+vec3f_t g_cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 
-int32_t g_previous_frame_time = 0;
+int64_t g_previous_frame_time = 0;
+
+Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 
 void setup_cube_points(void) {
   const float step_size = 2.0f / (g_cube_dimension - 1);
@@ -54,35 +59,75 @@ bool process_input(void) {
   return true;
 }
 
-point2f_t project(point3f_t point, const float fov) {
-  point2f_t projected_point = {
+point2f_t project(const point3f_t point, const float fov) {
+  return (point2f_t){
     .x = (fov * point.x) / point.z, .y = (fov * point.y) / point.z};
-  return projected_point;
+}
+
+double seconds_elapsed(
+  const uint64_t old_counter, const uint64_t current_counter) {
+  return (current_counter - old_counter)
+       / (double)SDL_GetPerformanceFrequency();
+}
+
+float maxf(float lhs, float rhs) {
+  if (lhs > rhs) {
+    return lhs;
+  }
+  return rhs;
 }
 
 void update(void) {
-  int32_t current_frame_time;
-  for (;;) {
-    current_frame_time = SDL_GetTicks();
-    if (SDL_TICKS_PASSED(
-          current_frame_time, g_previous_frame_time + frame_target_time())) {
-      break;
+  // reference: https://davidgow.net/handmadepenguin/ch18.html
+  // seconds elapsed since last update
+  const double seconds =
+    seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
+  if (seconds < seconds_per_frame()) {
+    // wait for one ms less than delay (due to precision issues)
+    fprintf(stderr, "seconds: %f\n", seconds);
+    const double remainder_s = (double)seconds_per_frame() - seconds;
+    fprintf(stderr, "remainder_s: %f\n", remainder_s);
+    const double remainder_pad_s = remainder_s - 0.004;
+    fprintf(stderr, "remainder_pad_s: %f\n", remainder_pad_s);
+    const double remainder_ms = remainder_pad_s * 1000.0;
+    fprintf(stderr, "remainder_ms: %f\n", remainder_ms);
+    const float remainder_ms_clamped = maxf(remainder_ms, 0.0f);
+    const uint32_t delay = (uint32_t)remainder_ms_clamped;
+    fprintf(stderr, "delay: %u\n", delay);
+    SDL_Delay(delay);
+    float t =
+      seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
+    fprintf(stderr, "elap: %f\n", t);
+    fprintf(stderr, "spf: %f\n", seconds_per_frame());
+    // check we didn't wait too long and get behind
+    assert(t < seconds_per_frame());
+    // busy wait for the remaining time
+    while (seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter())
+           < seconds_per_frame()) {
     }
   }
+  g_previous_frame_time = SDL_GetPerformanceCounter();
 
-  g_previous_frame_time = current_frame_time;
+  const int64_t time_window =
+    calculateWindow(&g_fps, SDL_GetPerformanceCounter());
+  const double framerate =
+    (double)(FpsMaxSamples - 1)
+    / ((double)(time_window) / SDL_GetPerformanceFrequency());
 
-  cube_rotation.x += 0.01f;
-  cube_rotation.y += 0.01f;
-  cube_rotation.z += 0.01f;
+  fprintf(stderr, "fps: %f\n", framerate);
+
+  g_cube_rotation.x += 0.01f;
+  g_cube_rotation.y += 0.01f;
+  g_cube_rotation.z += 0.01f;
+
   for (int i = 0; i < g_cube_point_count; ++i) {
     const point3f_t point = g_cube_points[i];
     const point3f_t rotated_point = point3f_rotate_z(
       point3f_rotate_y(
-        point3f_rotate_x(point, cube_rotation.x), cube_rotation.y),
-      cube_rotation.z);
+        point3f_rotate_x(point, g_cube_rotation.x), g_cube_rotation.y),
+      g_cube_rotation.z);
     const point3f_t transformed_point = point3f_sub_vec3f(
-      rotated_point, (vec3f_t){0.0f, 0.0f, camera_position.z});
+      rotated_point, (vec3f_t){0.0f, 0.0f, g_camera_position.z});
     g_projected_cube_points[i] = project(transformed_point, 1024.0f);
   }
 }

@@ -2,6 +2,16 @@
 
 #include <math.h>
 
+int clampi(const int value, const int min, const int max) {
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
 point3f_t point3f_from_vec3f(vec3f_t vec) {
   return (point3f_t){vec.x, vec.y, vec.z};
 }

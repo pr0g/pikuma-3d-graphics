@@ -23,6 +23,10 @@ int32_t frame_target_time(void) {
   return 1000 / fps();
 }
 
+float seconds_per_frame(void) {
+  return 1.0f / (float)fps();
+}
+
 bool initialize_window(void) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL.\n");
@@ -40,7 +44,7 @@ bool initialize_window(void) {
     SDL_WINDOWPOS_CENTERED,
     s_window_width,
     s_window_height,
-    SDL_WINDOW_BORDERLESS);
+    0 /*SDL_WINDOW_BORDERLESS*/);
 
   if (!s_window) {
     fprintf(stderr, "Error creating SDL window.\n");
@@ -54,7 +58,8 @@ bool initialize_window(void) {
     return false;
   }
 
-  SDL_SetWindowFullscreen(s_window, SDL_WINDOW_FULLSCREEN);
+  // disable fullscreen
+  // SDL_SetWindowFullscreen(s_window, SDL_WINDOW_FULLSCREEN);
 
   return true;
 }

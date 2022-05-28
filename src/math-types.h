@@ -55,6 +55,8 @@ typedef struct rect_t {
   size2i_t size;
 } rect_t;
 
+int clampi(int value, int min, int max);
+
 point3f_t point3f_from_vec3f(vec3f_t vec);
 vec3f_t vec3f_from_point3f(point3f_t point);
 
