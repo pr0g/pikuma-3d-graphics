@@ -84,37 +84,34 @@ void update(void) {
     seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
   if (seconds < seconds_per_frame()) {
     // wait for one ms less than delay (due to precision issues)
-    fprintf(stderr, "seconds: %f\n", seconds);
     const double remainder_s = (double)seconds_per_frame() - seconds;
-    fprintf(stderr, "remainder_s: %f\n", remainder_s);
+    // wait 4ms less than actual remainder due to resolution of SDL_Delay
+    // (we don't want to delay/sleep too long and get behind)
     const double remainder_pad_s = remainder_s - 0.004;
-    fprintf(stderr, "remainder_pad_s: %f\n", remainder_pad_s);
-    const double remainder_ms = remainder_pad_s * 1000.0;
-    fprintf(stderr, "remainder_ms: %f\n", remainder_ms);
-    const float remainder_ms_clamped = maxf(remainder_ms, 0.0f);
-    const uint32_t delay = (uint32_t)remainder_ms_clamped;
-    fprintf(stderr, "delay: %u\n", delay);
+    const double remainder_pad_ms = remainder_pad_s * 1000.0;
+    const double remainder_pad_ms_clamped = maxf(remainder_pad_ms, 0.0f);
+    const uint32_t delay = (uint32_t)remainder_pad_ms_clamped;
     SDL_Delay(delay);
-    float t =
+    const double seconds_left =
       seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
-    fprintf(stderr, "elap: %f\n", t);
-    fprintf(stderr, "spf: %f\n", seconds_per_frame());
     // check we didn't wait too long and get behind
-    assert(t < seconds_per_frame());
+    assert(seconds_left < seconds_per_frame());
     // busy wait for the remaining time
     while (seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter())
            < seconds_per_frame()) {
+      ;
     }
   }
   g_previous_frame_time = SDL_GetPerformanceCounter();
 
   const int64_t time_window =
     calculateWindow(&g_fps, SDL_GetPerformanceCounter());
-  const double framerate =
-    (double)(FpsMaxSamples - 1)
-    / ((double)(time_window) / SDL_GetPerformanceFrequency());
-
-  fprintf(stderr, "fps: %f\n", framerate);
+  if (time_window != -1) {
+    const double framerate =
+      (double)(FpsMaxSamples - 1)
+      / ((double)(time_window) / SDL_GetPerformanceFrequency());
+    // fprintf(stderr, "fps: %f\n", framerate);
+  }
 
   g_cube_rotation.x += 0.01f;
   g_cube_rotation.y += 0.01f;
