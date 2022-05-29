@@ -1,6 +1,7 @@
 #include "display.h"
 
 #include "math-types.h"
+#include "triangle.h"
 
 #include <SDL.h>
 
@@ -92,9 +93,9 @@ void draw_grid(const int spacing, const uint32_t color) {
   }
 }
 
-void draw_rect(const rect_t* rect, const uint32_t color) {
-  for (int y = rect->pos.y; y < rect->pos.y + rect->size.height; ++y) {
-    for (int x = rect->pos.x; x < rect->pos.x + rect->size.width; ++x) {
+void draw_rect(const rect_t rect, const uint32_t color) {
+  for (int y = rect.pos.y; y < rect.pos.y + rect.size.height; ++y) {
+    for (int x = rect.pos.x; x < rect.pos.x + rect.size.width; ++x) {
       draw_pixel((point2i_t){x, y}, color);
     }
   }
@@ -108,6 +109,13 @@ void draw_line(const point2i_t p0, const point2i_t p1, const uint32_t color) {
   for (int i = 0; i <= side_length; ++i) {
     draw_pixel(point2i_from_point2f(current), color);
     current = point2f_add_vec2f(current, inc);
+  }
+}
+
+void draw_wire_triangle(
+  const projected_triangle_t triangle, const uint32_t color) {
+  for (int v = 0; v < 3; ++v) {
+    draw_line(triangle.points[v], triangle.points[((v + 1) % 3)], color);
   }
 }
 

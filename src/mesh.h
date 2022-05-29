@@ -7,7 +7,7 @@
 #define MeshVertexCount 8
 #define MeshFaceCount 12
 
-extern point3f_t g_mesh_vertices[];
-extern face_t g_mesh_faces[];
+extern const point3f_t g_mesh_vertices[];
+extern const face_t g_mesh_faces[];
 
 #endif

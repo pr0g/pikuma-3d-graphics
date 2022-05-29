@@ -82,9 +82,9 @@ void update(void) {
   for (int i = 0; i < MeshFaceCount; ++i) {
     face_t mesh_face = g_mesh_faces[i];
     point3f_t face_vertices[] = {
-      [0] = g_mesh_vertices[mesh_face.a - 1],
-      [1] = g_mesh_vertices[mesh_face.b - 1],
-      [2] = g_mesh_vertices[mesh_face.c - 1]};
+      [0] = g_mesh_vertices[mesh_face.indices[0] - 1],
+      [1] = g_mesh_vertices[mesh_face.indices[1] - 1],
+      [2] = g_mesh_vertices[mesh_face.indices[2] - 1]};
 
     projected_triangle_t projected_triangle;
     for (int v = 0; v < 3; ++v) {
@@ -107,10 +107,7 @@ void render(void) {
   renderer_clear();
 
   for (int i = 0; i < MeshFaceCount; ++i) {
-    const projected_triangle_t triangle = g_triangles_to_render[i];
-    for (int v = 0; v < 3; ++v) {
-      draw_line(triangle.points[v], triangle.points[((v + 1) % 3)], 0xff00ffff);
-    }
+    draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
   }
 
   render_color_buffer();

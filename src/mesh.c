@@ -1,33 +1,31 @@
 #include "mesh.h"
 
-point3f_t g_mesh_vertices[] = { // cube
-  {.x = -1.0f, .y = -1.0f, .z = -1.0f },
-  {.x = -1.0f, .y =  1.0f, .z = -1.0f },
-  {.x =  1.0f, .y =  1.0f, .z = -1.0f },
-  {.x =  1.0f, .y = -1.0f, .z = -1.0f },
-  {.x =  1.0f, .y =  1.0f, .z =  1.0f },
-  {.x =  1.0f, .y = -1.0f, .z =  1.0f },
-  {.x = -1.0f, .y =  1.0f, .z =  1.0f },
-  {.x = -1.0f, .y = -1.0f, .z =  1.0f }
-};
+const point3f_t g_mesh_vertices[] = { // cube
+  {.x = -1.0f, .y = -1.0f, .z = -1.0f},
+  {.x = -1.0f, .y = 1.0f, .z = -1.0f},
+  {.x = 1.0f, .y = 1.0f, .z = -1.0f},
+  {.x = 1.0f, .y = -1.0f, .z = -1.0f},
+  {.x = 1.0f, .y = 1.0f, .z = 1.0f},
+  {.x = 1.0f, .y = -1.0f, .z = 1.0f},
+  {.x = -1.0f, .y = 1.0f, .z = 1.0f},
+  {.x = -1.0f, .y = -1.0f, .z = 1.0f}};
 
-face_t g_mesh_faces[] = {
+const face_t g_mesh_faces[] = {
   // front
-  {.a = 1, .b = 2, .c = 3},
-  {.a = 1, .b = 3, .c = 4},
+  {.indices = {1, 2, 3}},
+  {.indices = {1, 3, 4}},
   // right
-  {.a = 4, .b = 3, .c = 5},
-  {.a = 4, .b = 5, .c = 6},
+  {.indices = {4, 3, 5}},
+  {.indices = {4, 5, 6}},
   // back
-  {.a = 6, .b = 5, .c = 7},
-  {.a = 6, .b = 7, .c = 8},
+  {.indices = {6, 5, 7}},
+  {.indices = {6, 7, 8}},
   // left
-  {.a = 8, .b = 7, .c = 2},
-  {.a = 8, .b = 2, .c = 1},
+  {.indices = {8, 7, 2}},
+  {.indices = {8, 2, 1}},
   // top
-  {.a = 2, .b = 7, .c = 5},
-  {.a = 2, .b = 5, .c = 3},
+  {.indices = {2, 7, 5}},
+  {.indices = {2, 5, 3}},
   // bottom
-  {.a = 6, .b = 8, .c = 1},
-  {.a = 6, .b = 1, .c = 4}
-};
+  {.indices = {6, 8, 1}},
+  {.indices = {6, 1, 4}}};
