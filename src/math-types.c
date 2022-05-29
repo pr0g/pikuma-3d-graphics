@@ -19,20 +19,51 @@ float maxf(const float lhs, const float rhs) {
   return rhs;
 }
 
-point3f_t point3f_from_vec3f(vec3f_t vec) {
+int maxi(const int lhs, const int rhs) {
+  if (lhs > rhs) {
+    return lhs;
+  }
+  return rhs;
+}
+
+point3f_t point3f_from_vec3f(const vec3f_t vec) {
   return (point3f_t){vec.x, vec.y, vec.z};
 }
 
-vec3f_t vec3f_from_point3f(point3f_t point) {
+point3f_t point3f_from_point3i(const point3i_t point) {
+  return (point3f_t){(float)point.x, (float)point.y, (float)point.z};
+}
+
+point2f_t point2f_from_point2i(const point2i_t point) {
+  return (point2f_t){(float)point.x, (float)point.y};
+}
+
+point2i_t point2i_from_point2f(const point2f_t point) {
+  return (point2i_t){(int)roundf(point.x), (int)roundf(point.y)};
+}
+
+vec3f_t vec3f_from_point3f(const point3f_t point) {
   return (vec3f_t){point.x, point.y, point.z};
 }
 
-vec2i_t vec2i_add_vec2i(vec2i_t lhs, vec2i_t rhs) {
+vec2f_t vec2f_from_vec2i(const vec2i_t vec) {
+  return (vec2f_t){(float)vec.x, (float)vec.y};
+}
+
+vec2i_t vec2i_add_vec2i(const vec2i_t lhs, const vec2i_t rhs) {
   return (vec2i_t){lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
-point2i_t point2i_add_vec2i(point2i_t point, vec2i_t vec) {
+point2i_t point2i_add_vec2i(const point2i_t point, const vec2i_t vec) {
   return (point2i_t){point.x + vec.x, point.y + vec.y};
+}
+
+vec2i_t point2i_sub_point2i(const point2i_t lhs, const point2i_t rhs) {
+  return (vec2i_t){lhs.x - rhs.x, lhs.y - rhs.y};
+}
+
+point2f_t point2f_add_vec2f(const point2f_t point, const vec2f_t vec) {
+  return (point2f_t){point.x + vec.x, point.y + vec.y};
 }
 
 point3f_t point3f_add_vec3f(const point3f_t point, const vec3f_t vec) {
@@ -92,4 +123,8 @@ point3f_t point3f_rotate_y(const point3f_t point, const float angle) {
 
 point3f_t point3f_rotate_z(const point3f_t point, const float angle) {
   return point3f_from_vec3f(vec3f_rotate_z(vec3f_from_point3f(point), angle));
+}
+
+vec2f_t vec2i_div_real(const vec2i_t vec, const float real) {
+  return (vec2f_t){vec.x / real, vec.y / real};
 }

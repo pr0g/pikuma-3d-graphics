@@ -109,9 +109,7 @@ void render(void) {
   for (int i = 0; i < MeshFaceCount; ++i) {
     const projected_triangle_t triangle = g_triangles_to_render[i];
     for (int v = 0; v < 3; ++v) {
-      draw_rect(
-        &(rect_t){triangle.points[v], (size2i_t){.width = 3, .height = 3}},
-        0xffffff00);
+      draw_line(triangle.points[v], triangle.points[((v + 1) % 3)], 0xff00ffff);
     }
   }
 
