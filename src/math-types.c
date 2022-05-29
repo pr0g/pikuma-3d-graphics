@@ -12,12 +12,27 @@ int clampi(const int value, const int min, const int max) {
   return value;
 }
 
+float maxf(const float lhs, const float rhs) {
+  if (lhs > rhs) {
+    return lhs;
+  }
+  return rhs;
+}
+
 point3f_t point3f_from_vec3f(vec3f_t vec) {
   return (point3f_t){vec.x, vec.y, vec.z};
 }
 
 vec3f_t vec3f_from_point3f(point3f_t point) {
   return (vec3f_t){point.x, point.y, point.z};
+}
+
+vec2i_t vec2i_add_vec2i(vec2i_t lhs, vec2i_t rhs) {
+  return (vec2i_t){lhs.x + rhs.x, lhs.y + rhs.y};
+}
+
+point2i_t point2i_add_vec2i(point2i_t point, vec2i_t vec) {
+  return (point2i_t){point.x + vec.x, point.y + vec.y};
 }
 
 point3f_t point3f_add_vec3f(const point3f_t point, const vec3f_t vec) {
