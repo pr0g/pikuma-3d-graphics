@@ -90,9 +90,8 @@ void update(void) {
     // fprintf(stderr, "fps: %f\n", framerate);
   }
 
-  g_cube_rotation.x += 0.01f;
-  g_cube_rotation.y += 0.01f;
-  g_cube_rotation.z += 0.01f;
+  g_cube_rotation =
+    vec3f_add_vec3f(g_cube_rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
 
   for (int i = 0; i < MeshFaceCount; ++i) {
     face_t mesh_face = g_mesh_faces[i];
