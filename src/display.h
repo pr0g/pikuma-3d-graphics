@@ -9,11 +9,14 @@ struct SDL_Renderer;
 struct SDL_Texture;
 
 struct point2i_t;
+struct point2f_t;
+struct point3f_t;
 struct rect_t;
 
 int32_t fps(void);
 int32_t frame_target_time(void);
 float seconds_per_frame(void);
+double seconds_elapsed(uint64_t old_counter, uint64_t current_counter);
 
 bool initialize_window(void);
 void deinitialize_window(void);
@@ -33,5 +36,8 @@ void renderer_present(void);
 
 int window_width(void);
 int window_height(void);
+
+struct point2f_t projectf(struct point3f_t point, float fov);
+struct point2i_t projecti(struct point3f_t point, float fov);
 
 #endif // DISPLAY_H

@@ -27,6 +27,12 @@ float seconds_per_frame(void) {
   return 1.0f / (float)fps();
 }
 
+double seconds_elapsed(
+  const uint64_t old_counter, const uint64_t current_counter) {
+  return (current_counter - old_counter)
+       / (double)SDL_GetPerformanceFrequency();
+}
+
 bool initialize_window(void) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL.\n");
@@ -147,4 +153,16 @@ int window_width(void) {
 
 int window_height(void) {
   return s_window_height;
+}
+
+point2f_t projectf(const point3f_t point, const float fov) {
+  return (point2f_t){
+    .x = (fov * point.x) / point.z, .y = (fov * point.y) / point.z};
+}
+
+point2i_t projecti(const point3f_t point, const float fov) {
+  const point2f_t projected_point = projectf(point, fov);
+  return (point2i_t){
+    .x = (int)(roundf(projected_point.x)),
+    .y = (int)(roundf(projected_point.y))};
 }

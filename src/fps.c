@@ -1,6 +1,6 @@
 #include "fps.h"
 
-int64_t calculateWindow(Fps* fps, const int64_t now) {
+int64_t calculate_window(Fps* fps, const int64_t now) {
   if (!fps->initialized_ && fps->head_ == fps->tail_) {
     fps->initialized_ = true;
   }

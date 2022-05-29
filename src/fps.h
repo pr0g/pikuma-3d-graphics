@@ -11,4 +11,4 @@ typedef struct {
   bool initialized_;
 } Fps;
 
-int64_t calculateWindow(Fps* fps, int64_t now);
+int64_t calculate_window(Fps* fps, int64_t now);

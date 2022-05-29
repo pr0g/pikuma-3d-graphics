@@ -8,12 +8,9 @@
 #include <assert.h>
 
 projected_triangle_t g_triangles_to_render[MeshFaceCount];
-
 point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
 vec3f_t g_cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
-
 int64_t g_previous_frame_time = 0;
-
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 
 void setup(void) {
@@ -36,25 +33,7 @@ bool process_input(void) {
   return true;
 }
 
-point2f_t projectf(const point3f_t point, const float fov) {
-  return (point2f_t){
-    .x = (fov * point.x) / point.z, .y = (fov * point.y) / point.z};
-}
-
-point2i_t projecti(const point3f_t point, const float fov) {
-  const point2f_t projected_point = projectf(point, fov);
-  return (point2i_t){
-    .x = (int)(roundf(projected_point.x)),
-    .y = (int)(roundf(projected_point.y))};
-}
-
-double seconds_elapsed(
-  const uint64_t old_counter, const uint64_t current_counter) {
-  return (current_counter - old_counter)
-       / (double)SDL_GetPerformanceFrequency();
-}
-
-void update(void) {
+void wait_to_update(void) {
   // reference: https://davidgow.net/handmadepenguin/ch18.html
   // seconds elapsed since last update
   const double seconds =
@@ -80,15 +59,22 @@ void update(void) {
     }
   }
   g_previous_frame_time = SDL_GetPerformanceCounter();
+}
 
+void calculate_framerate(void) {
   const int64_t time_window =
-    calculateWindow(&g_fps, SDL_GetPerformanceCounter());
+    calculate_window(&g_fps, SDL_GetPerformanceCounter());
   if (time_window != -1) {
     const double framerate =
       (double)(FpsMaxSamples - 1)
       / ((double)(time_window) / SDL_GetPerformanceFrequency());
     // fprintf(stderr, "fps: %f\n", framerate);
   }
+}
+
+void update(void) {
+  wait_to_update();
+  calculate_framerate();
 
   g_cube_rotation =
     vec3f_add_vec3f(g_cube_rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
