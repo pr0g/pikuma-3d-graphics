@@ -11,12 +11,12 @@
 projected_triangle_t* g_triangles_to_render = NULL;
 
 point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
-vec3f_t g_cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 int64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 
 void setup(void) {
   create_color_buffer();
+  load_cube_mesh_data();
 }
 
 bool process_input(void) {
@@ -78,23 +78,24 @@ void update(void) {
   wait_to_update();
   calculate_framerate();
 
-  g_cube_rotation =
-    vec3f_add_vec3f(g_cube_rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
+  g_model.rotation =
+    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
 
-  for (int i = 0; i < MeshFaceCount; ++i) {
-    face_t mesh_face = g_mesh_faces[i];
-    point3f_t face_vertices[] = {
-      [0] = g_mesh_vertices[mesh_face.indices[0] - 1],
-      [1] = g_mesh_vertices[mesh_face.indices[1] - 1],
-      [2] = g_mesh_vertices[mesh_face.indices[2] - 1]};
+  for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
+       ++i) {
+    const face_t mesh_face = g_model.mesh.faces[i];
+    const point3f_t face_vertices[] = {
+      [0] = g_model.mesh.vertices[mesh_face.indices[0] - 1],
+      [1] = g_model.mesh.vertices[mesh_face.indices[1] - 1],
+      [2] = g_model.mesh.vertices[mesh_face.indices[2] - 1]};
 
     projected_triangle_t projected_triangle;
     for (int v = 0; v < 3; ++v) {
       const point3f_t rotated_vertex = point3f_rotate_z(
         point3f_rotate_y(
-          point3f_rotate_x(face_vertices[v], g_cube_rotation.x),
-          g_cube_rotation.y),
-        g_cube_rotation.z);
+          point3f_rotate_x(face_vertices[v], g_model.rotation.x),
+          g_model.rotation.y),
+        g_model.rotation.z);
       const point3f_t transformed_vertex = point3f_sub_vec3f(
         rotated_vertex, (vec3f_t){0.0f, 0.0f, g_camera_position.z});
       projected_triangle.points[v] = point2i_add_vec2i(
@@ -124,6 +125,8 @@ void render(void) {
 }
 
 void teardown(void) {
+  array_free(g_model.mesh.faces);
+  array_free(g_model.mesh.vertices);
   destroy_color_buffer();
   deinitialize_window();
 }
