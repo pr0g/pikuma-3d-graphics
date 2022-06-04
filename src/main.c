@@ -78,7 +78,7 @@ void update(void) {
   calculate_framerate();
 
   g_model.rotation =
-    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
+    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.0f, 0.0f});
 
   for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
        ++i) {
