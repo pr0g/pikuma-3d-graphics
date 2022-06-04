@@ -57,9 +57,8 @@ void load_obj_file_data(const char* filename) {
 
   const char* separator = " ";
   while (fgets(buffer, sizeof buffer, file) != NULL) {
-    // fprintf(stderr, "%s", buffer);
     char* line = buffer;
-    if (line[0] == 'v' && line[1] == ' ') {
+    if (strncmp(line, "v ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
       point3f_t vertex = {};
@@ -67,37 +66,25 @@ void load_obj_file_data(const char* filename) {
       int i = 0;
       while (token != NULL) {
         *vertices[i++] = atof(token);
-        // fprintf(stderr, "%s\n", token);
         token = strtok(NULL, separator);
       }
-      // fprintf(stderr, "%f, %f, %f\n", vertex.x, vertex.y, vertex.z);
       array_push(g_model.mesh.vertices, vertex);
-    } else if (line[0] == 'f' && line[1] == ' ') {
+    } else if (strncmp(line, "f ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
       face_t face = {};
       int i = 0;
       while (token != NULL) {
         const char* slash = strchr(token, '/');
-        int len = slash - token;
+        const int len = slash - token;
         char temp[32];
-        temp[0] = '\0';
         memcpy(temp, token, len);
         temp[len] = '\0';
-        // fprintf(stderr, "%d\n", len);
-        // fprintf(stderr, "%s\n", temp);
         face.indices[i++] = atoi(temp);
         token = strtok(NULL, separator);
       }
-      // fprintf(
-      //   stderr,
-      //   "%d, %d, %d\n",
-      //   face.indices[0],
-      //   face.indices[1],
-      //   face.indices[2]);
       array_push(g_model.mesh.faces, face);
     }
   }
-
   fclose(file);
 }
