@@ -15,7 +15,7 @@ Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 
 void setup(void) {
   create_color_buffer();
-  load_obj_file_data("assets/cube.obj");
+  load_obj_file_data("assets/f22.obj");
 }
 
 bool process_input(void) {

@@ -81,8 +81,9 @@ void load_obj_file_data(const char* filename) {
         const char* slash = strchr(token, '/');
         int len = slash - token;
         char temp[32];
+        temp[0] = '\0';
         memcpy(temp, token, len);
-        temp[len + 1] = '\0';
+        temp[len] = '\0';
         // fprintf(stderr, "%d\n", len);
         // fprintf(stderr, "%s\n", temp);
         face.indices[i++] = atoi(temp);
