@@ -9,14 +9,13 @@
 #include <assert.h>
 
 projected_triangle_t* g_triangles_to_render = NULL;
-
 point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
 int64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 
 void setup(void) {
   create_color_buffer();
-  load_cube_mesh_data();
+  load_obj_file_data("assets/cube.obj");
 }
 
 bool process_input(void) {
