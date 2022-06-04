@@ -1,5 +1,6 @@
 #include <SDL.h>
 
+#include "array.h"
 #include "display.h"
 #include "fps.h"
 #include "math-types.h"
@@ -7,7 +8,8 @@
 
 #include <assert.h>
 
-projected_triangle_t g_triangles_to_render[MeshFaceCount];
+projected_triangle_t* g_triangles_to_render = NULL;
+
 point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
 vec3f_t g_cube_rotation = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 int64_t g_previous_frame_time = 0;
@@ -99,16 +101,21 @@ void update(void) {
         projecti(transformed_vertex, 640.0f),
         (vec2i_t){window_width() / 2, window_height() / 2});
     }
-    g_triangles_to_render[i] = projected_triangle;
+    array_push(g_triangles_to_render, projected_triangle);
   }
 }
 
 void render(void) {
   renderer_clear();
 
-  for (int i = 0; i < MeshFaceCount; ++i) {
+  for (int i = 0, triangle_count = array_length(g_triangles_to_render);
+       i < triangle_count;
+       ++i) {
     draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
   }
+
+  array_free(g_triangles_to_render);
+  g_triangles_to_render = NULL;
 
   render_color_buffer();
   clear_color_buffer(0xff000000);
