@@ -115,6 +115,26 @@ vec3f_t vec3f_mul_scalar(const vec3f_t vec, const float scale) {
   return (vec3f_t){.x = vec.x * scale, .y = vec.y * scale, .z = vec.z * scale};
 }
 
+float vec3f_length(const vec3f_t vec) {
+  return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+vec2f_t vec2f_add_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
+  return (vec2f_t){.x = lhs.x + rhs.x, .y = lhs.y + rhs.y};
+}
+
+vec2f_t vec2f_sub_vec3f(const vec2f_t lhs, const vec2f_t rhs) {
+  return (vec2f_t){.x = lhs.x - rhs.x, .y = lhs.y - rhs.y};
+}
+
+vec2f_t vec2f_mul_scalar(const vec2f_t vec, const float scale) {
+  return (vec2f_t){.x = vec.x * scale, .y = vec.y * scale};
+}
+
+float vec2f_length(const vec2f_t vec) {
+  return sqrtf(vec.x * vec.x + vec.y * vec.y);
+}
+
 vec3f_t point3f_sub_point3f(const point3f_t lhs, const point3f_t rhs) {
   return (vec3f_t){.x = lhs.x - rhs.x, .y = lhs.y - rhs.y, .z = lhs.z - rhs.z};
 }
