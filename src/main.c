@@ -9,13 +9,13 @@
 #include <assert.h>
 
 projected_triangle_t* g_triangles_to_render = NULL;
-point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = -5.0f};
+point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 int64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 
 void setup(void) {
   create_color_buffer();
-  load_obj_file_data("assets/f22.obj");
+  load_obj_file_data("assets/cube.obj");
 }
 
 bool process_input(void) {
@@ -78,7 +78,7 @@ void update(void) {
   calculate_framerate();
 
   g_model.rotation =
-    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.0f, 0.0f});
+    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
 
   for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
        ++i) {
@@ -88,17 +88,35 @@ void update(void) {
       [1] = g_model.mesh.vertices[mesh_face.indices[1] - 1],
       [2] = g_model.mesh.vertices[mesh_face.indices[2] - 1]};
 
-    projected_triangle_t projected_triangle;
+    point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
       const point3f_t rotated_vertex = point3f_rotate_z(
         point3f_rotate_y(
           point3f_rotate_x(face_vertices[v], g_model.rotation.x),
           g_model.rotation.y),
         g_model.rotation.z);
-      const point3f_t transformed_vertex = point3f_sub_vec3f(
-        rotated_vertex, (vec3f_t){0.0f, 0.0f, g_camera_position.z});
+      transformed_vertices[v] =
+        point3f_add_vec3f(rotated_vertex, (vec3f_t){0.0f, 0.0f, 5.0f});
+    }
+
+    const point3f_t a = transformed_vertices[0];
+    const point3f_t b = transformed_vertices[1];
+    const point3f_t c = transformed_vertices[2];
+    const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
+    const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
+    const vec3f_t normal =
+      vec3f_normalized(vec3f_cross_vec3f(edge_ab, edge_ac));
+    const vec3f_t camera_direction = point3f_sub_point3f(g_camera_position, a);
+    const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
+
+    if (view_dot < 0.0f) {
+      continue;
+    }
+
+    projected_triangle_t projected_triangle;
+    for (int v = 0; v < 3; ++v) {
       projected_triangle.points[v] = point2i_add_vec2i(
-        projecti(transformed_vertex, 640.0f),
+        projecti(transformed_vertices[v], 640.0f),
         (vec2i_t){window_width() / 2, window_height() / 2});
     }
     array_push(g_triangles_to_render, projected_triangle);

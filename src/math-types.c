@@ -136,7 +136,7 @@ vec3f_t vec3f_div_scalar(const vec3f_t vec, const float scale) {
 }
 
 float vec3f_length(const vec3f_t vec) {
-  return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+  return sqrtf(vec3f_dot_vec3f(vec, vec));
 }
 
 vec2i_t vec2i_add_vec2i(const vec2i_t lhs, const vec2i_t rhs) {
@@ -176,7 +176,7 @@ vec2f_t vec2f_div_scalar(const vec2f_t vec, const float scale) {
 }
 
 float vec2f_length(const vec2f_t vec) {
-  return sqrtf(vec.x * vec.x + vec.y * vec.y);
+  return sqrtf(vec2f_dot_vec2f(vec, vec));
 }
 
 vec3f_t point3f_sub_point3f(const point3f_t lhs, const point3f_t rhs) {
@@ -216,6 +216,25 @@ point3f_t point3f_rotate_z(const point3f_t point, const float angle) {
   return point3f_from_vec3f(vec3f_rotate_z(vec3f_from_point3f(point), angle));
 }
 
-vec2f_t vec2i_div_real(const vec2i_t vec, const float real) {
-  return (vec2f_t){vec.x / real, vec.y / real};
+vec3f_t vec3f_cross_vec3f(const vec3f_t lhs, const vec3f_t rhs) {
+  return (vec3f_t){
+    lhs.y * rhs.z - lhs.z * rhs.y,
+    lhs.z * rhs.x - lhs.x * rhs.z,
+    lhs.x * rhs.y - lhs.y * rhs.x};
+}
+
+float vec2f_dot_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
+  return lhs.x * rhs.x + lhs.y * rhs.y;
+}
+
+float vec3f_dot_vec3f(const vec3f_t lhs, const vec3f_t rhs) {
+  return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+}
+
+vec2f_t vec2f_normalized(const vec2f_t vec) {
+  return vec2f_div_scalar(vec, vec2f_length(vec));
+}
+
+vec3f_t vec3f_normalized(const vec3f_t vec) {
+  return vec3f_div_scalar(vec, vec3f_length(vec));
 }

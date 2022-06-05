@@ -114,6 +114,12 @@ point3f_t point3f_rotate_x(point3f_t point, float angle);
 point3f_t point3f_rotate_y(point3f_t point, float angle);
 point3f_t point3f_rotate_z(point3f_t point, float angle);
 
-vec2f_t vec2i_div_real(vec2i_t vec, float real);
+vec3f_t vec3f_cross_vec3f(vec3f_t lhs, vec3f_t rhs);
+
+float vec2f_dot_vec2f(vec2f_t lhs, vec2f_t rhs);
+float vec3f_dot_vec3f(vec3f_t lhs, vec3f_t rhs);
+
+vec2f_t vec2f_normalized(vec2f_t vec);
+vec3f_t vec3f_normalized(vec3f_t vec);
 
 #endif // MATH_TYPES_H

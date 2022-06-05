@@ -104,7 +104,7 @@ void draw_rect(const rect_t rect, const uint32_t color) {
 void draw_line(const point2i_t p0, const point2i_t p1, const uint32_t color) {
   const vec2i_t delta = point2i_sub_point2i(p1, p0);
   const int side_length = maxi(abs(delta.x), abs(delta.y));
-  const vec2f_t inc = vec2i_div_real(delta, (float)side_length);
+  const vec2f_t inc = vec2i_div_scalar(delta, (float)side_length);
   point2f_t current = point2f_from_point2i(p0);
   for (int i = 0; i <= side_length; ++i) {
     draw_pixel(point2i_from_point2f(current), color);

@@ -7,9 +7,6 @@
 #define CubeVertexCount 8
 #define CubeFaceCount 12
 
-// extern const point3f_t g_cube_vertices[];
-// extern const face_t g_cube_faces[];
-
 typedef struct mesh_t {
   point3f_t* vertices;
   face_t* faces;
