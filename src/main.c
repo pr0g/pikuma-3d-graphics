@@ -8,10 +8,19 @@
 
 #include <assert.h>
 
+typedef enum display_mode_e {
+  display_mode_wireframe_vertices,
+  display_mode_wireframe,
+  display_mode_filled,
+  display_mode_filled_wireframe
+} display_mode_e;
+
 projected_triangle_t* g_triangles_to_render = NULL;
 point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
-int64_t g_previous_frame_time = 0;
+uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
+display_mode_e g_display_mode = display_mode_filled_wireframe;
+bool g_backface_culling = true;
 
 void setup(void) {
   create_color_buffer();
@@ -27,6 +36,17 @@ bool process_input(void) {
     case SDL_KEYDOWN:
       if (event.key.keysym.sym == SDLK_ESCAPE) {
         return false;
+      }
+      if (event.key.keysym.sym == SDLK_1) {
+        g_display_mode = display_mode_wireframe_vertices;
+      } else if (event.key.keysym.sym == SDLK_2) {
+        g_display_mode = display_mode_wireframe;
+      } else if (event.key.keysym.sym == SDLK_3) {
+        g_display_mode = display_mode_filled;
+      } else if (event.key.keysym.sym == SDLK_4) {
+        g_display_mode = display_mode_filled_wireframe;
+      } else if (event.key.keysym.sym == SDLK_c) {
+        g_backface_culling = !g_backface_culling;
       }
     default:
       break;
@@ -46,7 +66,7 @@ void wait_to_update(void) {
     // (we don't want to delay/sleep too long and get behind)
     const double remainder_pad_s = remainder_s - 0.004;
     const double remainder_pad_ms = remainder_pad_s * 1000.0;
-    const double remainder_pad_ms_clamped = maxf(remainder_pad_ms, 0.0f);
+    const double remainder_pad_ms_clamped = fmax(remainder_pad_ms, 0.0);
     const uint32_t delay = (uint32_t)remainder_pad_ms_clamped;
     SDL_Delay(delay);
     const double seconds_left =
@@ -99,18 +119,20 @@ void update(void) {
         point3f_add_vec3f(rotated_vertex, (vec3f_t){0.0f, 0.0f, 5.0f});
     }
 
-    const point3f_t a = transformed_vertices[0];
-    const point3f_t b = transformed_vertices[1];
-    const point3f_t c = transformed_vertices[2];
-    const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
-    const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
-    const vec3f_t normal =
-      vec3f_normalized(vec3f_cross_vec3f(edge_ab, edge_ac));
-    const vec3f_t camera_direction = point3f_sub_point3f(g_camera_position, a);
-    const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
-
-    if (view_dot < 0.0f) {
-      continue;
+    if (g_backface_culling) {
+      const point3f_t a = transformed_vertices[0];
+      const point3f_t b = transformed_vertices[1];
+      const point3f_t c = transformed_vertices[2];
+      const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
+      const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
+      const vec3f_t normal =
+        vec3f_normalized(vec3f_cross_vec3f(edge_ab, edge_ac));
+      const vec3f_t camera_direction =
+        point3f_sub_point3f(g_camera_position, a);
+      const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
+      if (view_dot < 0.0f) {
+        continue;
+      }
     }
 
     projected_triangle_t projected_triangle;
@@ -129,8 +151,29 @@ void render(void) {
   for (int i = 0, triangle_count = array_length(g_triangles_to_render);
        i < triangle_count;
        ++i) {
-    draw_filled_triangle(g_triangles_to_render[i], 0xff00ffff);
-    draw_wire_triangle(g_triangles_to_render[i], 0xff000000);
+    switch (g_display_mode) {
+      case display_mode_filled:
+        draw_filled_triangle(g_triangles_to_render[i], 0xff00ffff);
+        break;
+      case display_mode_filled_wireframe:
+        draw_filled_triangle(g_triangles_to_render[i], 0xff00ffff);
+        draw_wire_triangle(g_triangles_to_render[i], 0xff000000);
+        break;
+      case display_mode_wireframe_vertices: {
+        for (int p = 0; p < 3; ++p) {
+          const point2i_t point = g_triangles_to_render[i].points[p];
+          draw_rect(
+            (rect_t){
+              (point2i_t){.x = point.x - 2, .y = point.y - 2},
+              (size2i_t){.width = 5, .height = 5}},
+            0xffffffff);
+        }
+      }
+      // fallthrough
+      case display_mode_wireframe:
+        draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
+        break;
+    }
   }
 
   array_free(g_triangles_to_render);
