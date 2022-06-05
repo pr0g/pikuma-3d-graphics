@@ -77,10 +77,6 @@ vec3i_t vec3i_from_vec3f(const vec3f_t vec) {
   return (vec3i_t){(int)roundf(vec.x), (int)roundf(vec.y), (int)roundf(vec.z)};
 }
 
-vec2i_t vec2i_add_vec2i(const vec2i_t lhs, const vec2i_t rhs) {
-  return (vec2i_t){lhs.x + rhs.x, lhs.y + rhs.y};
-}
-
 point2i_t point2i_add_vec2i(const point2i_t point, const vec2i_t vec) {
   return (point2i_t){point.x + vec.x, point.y + vec.y};
 }
@@ -103,6 +99,26 @@ point3f_t point3f_sub_vec3f(const point3f_t point, const vec3f_t vec) {
     .x = point.x - vec.x, .y = point.y - vec.y, .z = point.z - vec.z};
 }
 
+vec3i_t vec3i_add_vec3i(const vec3i_t lhs, const vec3i_t rhs) {
+  return (vec3i_t){.x = lhs.x + rhs.x, .y = lhs.y + rhs.y, .z = lhs.z + rhs.z};
+}
+
+vec3i_t vec3i_sub_vec3i(const vec3i_t lhs, const vec3i_t rhs) {
+  return (vec3i_t){.x = lhs.x - rhs.x, .y = lhs.y - rhs.y, .z = lhs.z - rhs.z};
+}
+
+vec3f_t vec3i_mul_scalar(const vec3i_t vec, const float scale) {
+  return (vec3f_t){.x = vec.x * scale, .y = vec.y * scale, .z = vec.z * scale};
+}
+
+vec3f_t vec3i_div_scalar(const vec3i_t vec, const float scale) {
+  return (vec3f_t){.x = vec.x / scale, .y = vec.y / scale, .z = vec.z / scale};
+}
+
+float vec3i_length(const vec3i_t vec) {
+  return sqrtf((float)(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z));
+}
+
 vec3f_t vec3f_add_vec3f(const vec3f_t lhs, const vec3f_t rhs) {
   return (vec3f_t){.x = lhs.x + rhs.x, .y = lhs.y + rhs.y, .z = lhs.z + rhs.z};
 }
@@ -115,8 +131,32 @@ vec3f_t vec3f_mul_scalar(const vec3f_t vec, const float scale) {
   return (vec3f_t){.x = vec.x * scale, .y = vec.y * scale, .z = vec.z * scale};
 }
 
+vec3f_t vec3f_div_scalar(const vec3f_t vec, const float scale) {
+  return (vec3f_t){.x = vec.x / scale, .y = vec.y / scale, .z = vec.z / scale};
+}
+
 float vec3f_length(const vec3f_t vec) {
   return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+vec2i_t vec2i_add_vec2i(const vec2i_t lhs, const vec2i_t rhs) {
+  return (vec2i_t){.x = lhs.x + rhs.x, .y = lhs.y + rhs.y};
+}
+
+vec2i_t vec2i_sub_vec2i(const vec2i_t lhs, const vec2i_t rhs) {
+  return (vec2i_t){.x = lhs.x - rhs.x, .y = lhs.y - rhs.y};
+}
+
+vec2f_t vec2i_mul_scalar(const vec2i_t vec, const float scale) {
+  return (vec2f_t){.x = vec.x * scale, .y = vec.y * scale};
+}
+
+vec2f_t vec2i_div_scalar(const vec2i_t vec, const float scale) {
+  return (vec2f_t){.x = vec.x / scale, .y = vec.y / scale};
+}
+
+float vec2i_length(const vec2i_t vec) {
+  return sqrtf((float)(vec.x * vec.x + vec.y * vec.y));
 }
 
 vec2f_t vec2f_add_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
@@ -129,6 +169,10 @@ vec2f_t vec2f_sub_vec3f(const vec2f_t lhs, const vec2f_t rhs) {
 
 vec2f_t vec2f_mul_scalar(const vec2f_t vec, const float scale) {
   return (vec2f_t){.x = vec.x * scale, .y = vec.y * scale};
+}
+
+vec2f_t vec2f_div_scalar(const vec2f_t vec, const float scale) {
+  return (vec2f_t){.x = vec.x / scale, .y = vec.y / scale};
 }
 
 float vec2f_length(const vec2f_t vec) {
