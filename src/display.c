@@ -119,6 +119,70 @@ void draw_wire_triangle(
   }
 }
 
+static int compare_point2f(const void* lhs, const void* rhs) {
+  const point2f_t arg1 = *(const point2f_t*)(lhs);
+  const point2f_t arg2 = *(const point2f_t*)(rhs);
+  if (arg1.y < arg2.y) {
+    return -1;
+  }
+  if (arg1.y > arg2.y) {
+    return 1;
+  }
+  return 0;
+}
+
+static void swap_int(int* lhs, int* rhs) {
+  int temp = *lhs;
+  *lhs = *rhs;
+  *rhs = temp;
+}
+
+static void fill_flat_bottom_triangle(
+  const projected_triangle_t triangle, const uint32_t color) {
+  const float inv_slope1 = (float)(triangle.points[1].x - triangle.points[0].x)
+                         / (float)(triangle.points[1].y - triangle.points[0].y);
+  const float inv_slope2 = (float)(triangle.points[2].x - triangle.points[0].x)
+                         / (float)(triangle.points[2].y - triangle.points[0].y);
+  float x_start = (float)triangle.points[0].x;
+  float x_end = (float)triangle.points[0].x;
+  for (int y = triangle.points[0].y; y <= triangle.points[2].y; ++y) {
+    draw_line(
+      point2i_from_point2f((point2f_t){x_start, (float)y}),
+      point2i_from_point2f((point2f_t){x_end, (float)y}),
+      color);
+    x_start += inv_slope1;
+    x_end += inv_slope2;
+  }
+}
+
+static void fill_flat_top_triangle(
+  const projected_triangle_t triangle, const uint32_t color) {
+}
+
+void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
+  qsort(
+    triangle.points,
+    sizeof triangle.points / sizeof *triangle.points,
+    sizeof(point2f_t),
+    compare_point2f);
+
+  const int my = triangle.points[1].y;
+  const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
+                   * (triangle.points[1].y - triangle.points[0].y))
+                  / (float)(triangle.points[2].y - triangle.points[0].y))
+               + triangle.points[0].x;
+
+  fill_flat_bottom_triangle(
+    (projected_triangle_t){
+      .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
+    color);
+
+  fill_flat_top_triangle(
+    (projected_triangle_t){
+      .points = {triangle.points[0], {.x = mx, .y = my}, triangle.points[2]}},
+    color);
+}
+
 void clear_color_buffer(const uint32_t color) {
   for (int col = 0; col < s_window_width; ++col) {
     for (int row = 0; row < s_window_height; ++row) {

@@ -126,11 +126,17 @@ void update(void) {
 void render(void) {
   renderer_clear();
 
-  for (int i = 0, triangle_count = array_length(g_triangles_to_render);
-       i < triangle_count;
-       ++i) {
-    draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
-  }
+  // for (int i = 0, triangle_count = array_length(g_triangles_to_render);
+  //      i < triangle_count;
+  //      ++i) {
+  //   draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
+  // }
+
+  draw_filled_triangle(
+    (projected_triangle_t){
+      .points =
+        {{.x = 500, .y = 700}, {.x = 50, .y = 400}, {.x = 300, .y = 100}}},
+    0xff00ff00);
 
   array_free(g_triangles_to_render);
   g_triangles_to_render = NULL;
