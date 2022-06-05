@@ -12,6 +12,16 @@ int clampi(const int value, const int min, const int max) {
   return value;
 }
 
+float clampf(float value, float min, float max) {
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
 float maxf(const float lhs, const float rhs) {
   if (lhs > rhs) {
     return lhs;
@@ -34,6 +44,11 @@ point3f_t point3f_from_point3i(const point3i_t point) {
   return (point3f_t){(float)point.x, (float)point.y, (float)point.z};
 }
 
+point3i_t point3i_from_point3f(const point3f_t point) {
+  return (point3i_t){
+    (int)roundf(point.x), (int)roundf(point.y), (int)roundf(point.z)};
+}
+
 point2f_t point2f_from_point2i(const point2i_t point) {
   return (point2f_t){(float)point.x, (float)point.y};
 }
@@ -48,6 +63,18 @@ vec3f_t vec3f_from_point3f(const point3f_t point) {
 
 vec2f_t vec2f_from_vec2i(const vec2i_t vec) {
   return (vec2f_t){(float)vec.x, (float)vec.y};
+}
+
+vec2i_t vec2i_from_vec2f(const vec2f_t vec) {
+  return (vec2i_t){(int)roundf(vec.x), (int)roundf(vec.y)};
+}
+
+vec3f_t vec3f_from_vec3i(const vec3i_t vec) {
+  return (vec3f_t){(float)vec.x, (float)vec.y, (float)vec.z};
+}
+
+vec3i_t vec3i_from_vec3f(const vec3f_t vec) {
+  return (vec3i_t){(int)roundf(vec.x), (int)roundf(vec.y), (int)roundf(vec.z)};
 }
 
 vec2i_t vec2i_add_vec2i(const vec2i_t lhs, const vec2i_t rhs) {
