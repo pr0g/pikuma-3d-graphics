@@ -137,26 +137,40 @@ static void swap_int(int* lhs, int* rhs) {
   *rhs = temp;
 }
 
-static void fill_flat_bottom_triangle(
-  const projected_triangle_t triangle, const uint32_t color) {
-  const float inv_slope1 = (float)(triangle.points[1].x - triangle.points[0].x)
-                         / (float)(triangle.points[1].y - triangle.points[0].y);
-  const float inv_slope2 = (float)(triangle.points[2].x - triangle.points[0].x)
-                         / (float)(triangle.points[2].y - triangle.points[0].y);
-  float x_start = (float)triangle.points[0].x;
-  float x_end = (float)triangle.points[0].x;
-  for (int y = triangle.points[0].y; y <= triangle.points[2].y; ++y) {
+static void fill_triangle(
+  const point2i_t start,
+  const point2i_t left,
+  const point2i_t right,
+  const float scale,
+  const uint32_t color) {
+  const float inv_slope1 =
+    (float)((left.x - start.x) / (float)(left.y - start.y)) * scale;
+  const float inv_slope2 =
+    (float)((right.x - start.x) / (float)(right.y - start.y)) * scale;
+  float x_start = (float)start.x;
+  float x_end = (float)start.x;
+  const int delta = abs(left.y - start.y);
+  for (int y = 0; y <= delta; y++) {
+    const float yy = (float)start.y + (float)y * scale;
     draw_line(
-      point2i_from_point2f((point2f_t){x_start, (float)y}),
-      point2i_from_point2f((point2f_t){x_end, (float)y}),
+      point2i_from_point2f((point2f_t){x_start, yy}),
+      point2i_from_point2f((point2f_t){x_end, yy}),
       color);
     x_start += inv_slope1;
     x_end += inv_slope2;
   }
 }
 
+static void fill_flat_bottom_triangle(
+  const projected_triangle_t triangle, const uint32_t color) {
+  fill_triangle(
+    triangle.points[0], triangle.points[1], triangle.points[2], 1.0f, color);
+}
+
 static void fill_flat_top_triangle(
   const projected_triangle_t triangle, const uint32_t color) {
+  fill_triangle(
+    triangle.points[2], triangle.points[0], triangle.points[1], -1.0f, color);
 }
 
 void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
@@ -179,7 +193,7 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
 
   fill_flat_top_triangle(
     (projected_triangle_t){
-      .points = {triangle.points[0], {.x = mx, .y = my}, triangle.points[2]}},
+      .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
     color);
 }
 
