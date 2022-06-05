@@ -144,9 +144,9 @@ static void fill_triangle(
   const float scale,
   const uint32_t color) {
   const float inv_slope1 =
-    (float)((left.x - start.x) / (float)(left.y - start.y)) * scale;
+    ((float)(left.x - start.x) / (float)(left.y - start.y)) * scale;
   const float inv_slope2 =
-    (float)((right.x - start.x) / (float)(right.y - start.y)) * scale;
+    ((float)(right.x - start.x) / (float)(right.y - start.y)) * scale;
   float x_start = (float)start.x;
   float x_end = (float)start.x;
   const int delta = abs(left.y - start.y);
@@ -180,21 +180,31 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
     sizeof(point2f_t),
     compare_point2f);
 
-  const int my = triangle.points[1].y;
-  const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
+  if (triangle.points[1].y == triangle.points[2].y) {
+    fill_flat_bottom_triangle(
+      (projected_triangle_t){
+        .points = {triangle.points[0], triangle.points[1], triangle.points[2]}},
+      color);
+  } else if (triangle.points[0].y == triangle.points[1].y) {
+    fill_flat_top_triangle(
+      (projected_triangle_t){
+        .points = {triangle.points[0], triangle.points[1], triangle.points[2]}},
+      color);
+  } else {
+    const int my = triangle.points[1].y;
+    const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
                    * (triangle.points[1].y - triangle.points[0].y))
                   / (float)(triangle.points[2].y - triangle.points[0].y))
                + triangle.points[0].x;
-
-  fill_flat_bottom_triangle(
-    (projected_triangle_t){
-      .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
-    color);
-
-  fill_flat_top_triangle(
-    (projected_triangle_t){
-      .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
-    color);
+    fill_flat_bottom_triangle(
+      (projected_triangle_t){
+        .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
+      color);
+    fill_flat_top_triangle(
+      (projected_triangle_t){
+        .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
+      color);
+  }
 }
 
 void clear_color_buffer(const uint32_t color) {
