@@ -24,7 +24,7 @@ bool g_backface_culling = true;
 
 void setup(void) {
   create_color_buffer();
-  load_obj_file_data("assets/cube.obj");
+  load_obj_file_data("assets/f22.obj");
 }
 
 bool process_input(void) {
@@ -93,6 +93,19 @@ void calculate_framerate(void) {
   }
 }
 
+// sort largest to smallest
+static int compare_projected_triangle(const void* lhs, const void* rhs) {
+  const projected_triangle_t* arg1 = (const projected_triangle_t*)(lhs);
+  const projected_triangle_t* arg2 = (const projected_triangle_t*)(rhs);
+  if (arg1->average_depth < arg2->average_depth) {
+    return 1;
+  }
+  if (arg1->average_depth > arg2->average_depth) {
+    return -1;
+  }
+  return 0;
+}
+
 void update(void) {
   wait_to_update();
   calculate_framerate();
@@ -136,6 +149,11 @@ void update(void) {
     }
 
     projected_triangle_t projected_triangle;
+    projected_triangle.average_depth =
+      (transformed_vertices[0].z + transformed_vertices[1].z
+       + transformed_vertices[2].z)
+      / 3;
+
     for (int v = 0; v < 3; ++v) {
       projected_triangle.points[v] = point2i_add_vec2i(
         projecti(transformed_vertices[v], 640.0f),
@@ -143,6 +161,12 @@ void update(void) {
     }
     array_push(g_triangles_to_render, projected_triangle);
   }
+
+  qsort(
+    g_triangles_to_render,
+    array_length(g_triangles_to_render),
+    sizeof(projected_triangle_t),
+    compare_projected_triangle);
 }
 
 void render(void) {

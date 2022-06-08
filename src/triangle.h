@@ -9,6 +9,7 @@ typedef struct face_t {
 
 typedef struct projected_triangle_t {
   point2i_t points[3];
+  float average_depth;
 } projected_triangle_t;
 
 #endif
