@@ -62,25 +62,35 @@ typedef struct rect_t {
   size2i_t size;
 } rect_t;
 
-typedef struct mat3f_t {
+typedef struct mat33f_t {
   float elem[9];
-} mat3f_t;
+} mat33f_t;
 
-typedef struct mat4f_t {
+typedef struct mat44f_t {
   float elem[16];
-} mat4f_t;
+} mat44f_t;
 
-int mat3_rc(int r, int c);
-int mat4_rc(int r, int c);
+typedef struct mat34f_t {
+  float elem[12];
+} mat34f_t;
 
-mat3f_t mat3f_identity(void);
-mat4f_t mat4f_identity(void);
+int mat33_rc(int r, int c);
+int mat44_rc(int r, int c);
 
-mat3f_t mat3f_uniform_scale_from_float(float scale);
-mat3f_t mat3f_scale_from_floats(float scale_x, float scale_y, float scale_z);
-mat3f_t mat3f_scale_from_vec3f(vec3f_t scale_xyz);
+mat33f_t mat33f_identity(void);
+mat34f_t mat34f_identity(void);
+mat44f_t mat44f_identity(void);
 
-point3f_t mat3f_multiply_point3f(mat3f_t mat, point3f_t point);
+mat33f_t mat33f_uniform_scale_from_float(float scale);
+mat33f_t mat33f_scale_from_floats(float scale_x, float scale_y, float scale_z);
+mat33f_t mat33f_scale_from_vec3f(vec3f_t scale_xyz);
+
+mat34f_t mat34f_translation_from_floats(
+  float translation_x, float translation_y, float translation_z);
+mat34f_t mat34f_translation_from_vec3f(vec3f_t translation);
+
+point3f_t mat33f_multiply_point3f(mat33f_t mat, point3f_t point);
+point3f_t mat34f_multiply_point3f(mat34f_t mat, point3f_t point);
 
 int clampi(int value, int min, int max);
 float clampf(float value, float min, float max);

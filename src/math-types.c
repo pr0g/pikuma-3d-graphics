@@ -6,40 +6,73 @@ static int mat_rc(const int r, const int c, const int d) {
   return r * d + c;
 }
 
-int mat3_rc(const int r, const int c) {
+int mat33_rc(const int r, const int c) {
   return mat_rc(r, c, 3);
 }
 
-int mat4_rc(const int r, const int c) {
+int mat44_rc(const int r, const int c) {
   return mat_rc(r, c, 4);
 }
 
-mat3f_t mat3f_identity(void) {
-  return mat3f_uniform_scale_from_float(1.0f);
+mat33f_t mat33f_identity(void) {
+  return mat33f_uniform_scale_from_float(1.0f);
 }
 
-mat4f_t mat4f_identity(void) {
-  return (mat4f_t){.elem = {[0] = 1.0f, [5] = 1.0f, [10] = 1.0f, [15] = 1.0f}};
+mat44f_t mat44f_identity(void) {
+  return (mat44f_t){.elem = {[0] = 1.0f, [5] = 1.0f, [10] = 1.0f, [15] = 1.0f}};
 }
 
-mat3f_t mat3f_uniform_scale_from_float(const float scale) {
-  return mat3f_scale_from_floats(scale, scale, scale);
+mat34f_t mat34f_identity(void) {
+  return (mat34f_t){.elem = {[0] = 1.0f, [5] = 1.0f, [10] = 1.0f}};
 }
 
-mat3f_t mat3f_scale_from_floats(
+mat33f_t mat33f_uniform_scale_from_float(const float scale) {
+  return mat33f_scale_from_floats(scale, scale, scale);
+}
+
+mat33f_t mat33f_scale_from_floats(
   const float scale_x, const float scale_y, const float scale_z) {
-  return (mat3f_t){.elem = {[0] = scale_x, [4] = scale_y, [8] = scale_z}};
+  return (mat33f_t){.elem = {[0] = scale_x, [4] = scale_y, [8] = scale_z}};
 }
 
-mat3f_t mat3f_scale_from_vec3f(const vec3f_t scale_xyz) {
-  return mat3f_scale_from_floats(scale_xyz.x, scale_xyz.y, scale_xyz.z);
+mat33f_t mat33f_scale_from_vec3f(const vec3f_t scale_xyz) {
+  return mat33f_scale_from_floats(scale_xyz.x, scale_xyz.y, scale_xyz.z);
 }
 
-point3f_t mat3f_multiply_point3f(const mat3f_t mat, const point3f_t point) {
+mat34f_t mat34f_translation_from_floats(
+  const float translation_x,
+  const float translation_y,
+  const float translation_z) {
+  return (mat34f_t){
+    .elem = {
+      [0] = 1.0f,
+      [5] = 1.0f,
+      [10] = 1.0f,
+      [3] = translation_x,
+      [7] = translation_y,
+      [11] = translation_z}};
+}
+
+mat34f_t mat34f_translation_from_vec3f(const vec3f_t translation) {
+  return mat34f_translation_from_floats(
+    translation.x, translation.y, translation.z);
+}
+
+point3f_t mat33f_multiply_point3f(const mat33f_t mat, const point3f_t point) {
   return (point3f_t){
     .x = mat.elem[0] * point.x + mat.elem[1] * point.y + mat.elem[2] * point.z,
     .y = mat.elem[3] * point.x + mat.elem[4] * point.y + mat.elem[5] * point.z,
     .z = mat.elem[6] * point.x + mat.elem[7] * point.y + mat.elem[8] * point.z};
+}
+
+point3f_t mat34f_multiply_point3f(const mat34f_t mat, const point3f_t point) {
+  return (point3f_t){
+    .x = mat.elem[0] * point.x + mat.elem[1] * point.y + mat.elem[2] * point.z
+       + mat.elem[3],
+    .y = mat.elem[4] * point.x + mat.elem[5] * point.y + mat.elem[6] * point.z
+       + mat.elem[7],
+    .z = mat.elem[8] * point.x + mat.elem[9] * point.y + mat.elem[10] * point.z
+       + mat.elem[11]};
 }
 
 int clampi(const int value, const int min, const int max) {

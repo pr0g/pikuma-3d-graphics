@@ -112,9 +112,14 @@ void update(void) {
 
   g_model.rotation =
     vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
-  g_model.scale = vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
+  // vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
+  g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
+  g_model.translation =
+    vec3f_add_vec3f(g_model.translation, (vec3f_t){0.0f, 0.01f, 0.0f});
 
-  const mat3f_t scale = mat3f_scale_from_vec3f(g_model.scale);
+  const mat33f_t scale = mat33f_scale_from_vec3f(g_model.scale);
+  const mat34f_t translation =
+    mat34f_translation_from_vec3f(g_model.translation);
   for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
        ++i) {
     const face_t mesh_face = g_model.mesh.faces[i];
@@ -126,14 +131,16 @@ void update(void) {
     point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
       const point3f_t scaled_vertex =
-        mat3f_multiply_point3f(scale, face_vertices[v]);
+        mat33f_multiply_point3f(scale, face_vertices[v]);
       const point3f_t rotated_vertex = point3f_rotate_z(
         point3f_rotate_y(
           point3f_rotate_x(scaled_vertex, g_model.rotation.x),
           g_model.rotation.y),
         g_model.rotation.z);
+      const point3f_t translated_vertex =
+        mat34f_multiply_point3f(translation, rotated_vertex);
       transformed_vertices[v] =
-        point3f_add_vec3f(rotated_vertex, (vec3f_t){0.0f, 0.0f, 5.0f});
+        point3f_add_vec3f(translated_vertex, (vec3f_t){0.0f, 0.0f, 5.0f});
     }
 
     if (g_backface_culling) {
