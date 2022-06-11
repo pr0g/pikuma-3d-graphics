@@ -61,8 +61,10 @@ float clampf(float value, float min, float max);
 int maxi(int lhs, int rhs);
 float maxf(float lhs, float rhs);
 
-point3f_t point3f_from_vec3f(vec3f_t vec);
+vec2f_t vec2f_from_point2f(point2f_t point);
 vec3f_t vec3f_from_point3f(point3f_t point);
+point2f_t point2f_from_vec2f(vec2f_t vec);
+point3f_t point3f_from_vec3f(vec3f_t vec);
 
 point2f_t point2f_from_point2i(point2i_t point);
 point2i_t point2i_from_point2f(point2f_t point);

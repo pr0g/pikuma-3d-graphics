@@ -61,6 +61,14 @@ vec3f_t vec3f_from_point3f(const point3f_t point) {
   return (vec3f_t){point.x, point.y, point.z};
 }
 
+point2f_t point2f_from_vec2f(const vec2f_t vec) {
+  return (point2f_t){vec.x, vec.y};
+}
+
+vec2f_t vec2f_from_point2f(const point2f_t point) {
+  return (vec2f_t){point.x, point.y};
+}
+
 vec2f_t vec2f_from_vec2i(const vec2i_t vec) {
   return (vec2f_t){(float)vec.x, (float)vec.y};
 }
