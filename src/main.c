@@ -137,10 +137,8 @@ void update(void) {
           point3f_rotate_x(scaled_vertex, g_model.rotation.x),
           g_model.rotation.y),
         g_model.rotation.z);
-      const point3f_t translated_vertex =
-        mat34f_multiply_point3f(translation, rotated_vertex);
       transformed_vertices[v] =
-        point3f_add_vec3f(translated_vertex, (vec3f_t){0.0f, 0.0f, 5.0f});
+        mat34f_multiply_point3f(translation, rotated_vertex);
     }
 
     if (g_backface_culling) {

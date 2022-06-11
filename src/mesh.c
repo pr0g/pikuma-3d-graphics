@@ -10,7 +10,7 @@ model_t g_model = {
   (mesh_t){.faces = NULL, .vertices = NULL},
   .scale = (vec3f_t){1.0f, 1.0f, 1.0f},
   .rotation = (vec3f_t){0.0f, 0.0f, 0.0f},
-  .translation = (vec3f_t){0.0f, 0.0f, 0.0f}};
+  .translation = (vec3f_t){0.0f, 0.0f, 5.0f}};
 
 const point3f_t g_cube_vertices[] = { // cube
   {.x = -1.0f, .y = -1.0f, .z = -1.0f},
