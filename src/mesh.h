@@ -15,6 +15,8 @@ typedef struct mesh_t {
 typedef struct model_t {
   mesh_t mesh;
   vec3f_t rotation;
+  vec3f_t scale;
+  vec3f_t translation;
 } model_t;
 
 extern model_t g_model;

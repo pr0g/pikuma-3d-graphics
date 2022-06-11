@@ -12,6 +12,13 @@ typedef struct vec3f_t {
   float z;
 } vec3f_t;
 
+typedef struct vec4f_t {
+  float x;
+  float y;
+  float z;
+  float w;
+} vec4f_t;
+
 typedef struct vec2i_t {
   int x;
   int y;
@@ -55,11 +62,33 @@ typedef struct rect_t {
   size2i_t size;
 } rect_t;
 
+typedef struct mat3f_t {
+  float elem[9];
+} mat3f_t;
+
+typedef struct mat4f_t {
+  float elem[16];
+} mat4f_t;
+
+int mat3_rc(int r, int c);
+int mat4_rc(int r, int c);
+
+mat3f_t mat3f_identity(void);
+mat4f_t mat4f_identity(void);
+
+mat3f_t mat3f_uniform_scale_from_float(float scale);
+mat3f_t mat3f_scale_from_floats(float scale_x, float scale_y, float scale_z);
+mat3f_t mat3f_scale_from_vec3f(vec3f_t scale_xyz);
+
+point3f_t mat3f_multiply_point3f(mat3f_t mat, point3f_t point);
+
 int clampi(int value, int min, int max);
 float clampf(float value, float min, float max);
 
 int maxi(int lhs, int rhs);
 float maxf(float lhs, float rhs);
+
+// vec4f vec4f_from_vec3f(...)
 
 vec2f_t vec2f_from_point2f(point2f_t point);
 vec3f_t vec3f_from_point3f(point3f_t point);

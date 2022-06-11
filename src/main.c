@@ -112,7 +112,9 @@ void update(void) {
 
   g_model.rotation =
     vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
+  g_model.scale = vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
 
+  const mat3f_t scale = mat3f_scale_from_vec3f(g_model.scale);
   for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
        ++i) {
     const face_t mesh_face = g_model.mesh.faces[i];
@@ -123,9 +125,11 @@ void update(void) {
 
     point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
+      const point3f_t scaled_vertex =
+        mat3f_multiply_point3f(scale, face_vertices[v]);
       const point3f_t rotated_vertex = point3f_rotate_z(
         point3f_rotate_y(
-          point3f_rotate_x(face_vertices[v], g_model.rotation.x),
+          point3f_rotate_x(scaled_vertex, g_model.rotation.x),
           g_model.rotation.y),
         g_model.rotation.z);
       transformed_vertices[v] =
