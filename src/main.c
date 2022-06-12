@@ -176,14 +176,13 @@ void update(void) {
       projected_points[v] = mat44f_project_point3f(
         g_perspective_projection, transformed_vertices[v]);
 
-      projected_points[v].x *= (float)window_width() / 2.0f;
-      projected_points[v].y *= (float)window_height() / 2.0f;
-
-      projected_triangle.points[v] =
-        point2i_from_point2f(point2f_from_point4f(projected_points[v]));
+      const point2f_t projected_point = mat22f_multiply_point2f(
+        mat22f_scale_from_floats(
+          (float)window_width() / 2.0f, (float)window_height() / 2.0f),
+        point2f_from_point4f(projected_points[v]));
 
       projected_triangle.points[v] = point2i_add_vec2i(
-        projected_triangle.points[v],
+        point2i_from_point2f(projected_point),
         (vec2i_t){window_width() / 2, window_height() / 2});
     }
 

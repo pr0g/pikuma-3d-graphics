@@ -67,6 +67,10 @@ typedef struct rect_t {
   size2i_t size;
 } rect_t;
 
+typedef struct mat22f_t {
+  float elem[4];
+} mat22f_t;
+
 typedef struct mat33f_t {
   float elem[9];
 } mat33f_t;
@@ -85,9 +89,14 @@ float degrees_from_radians(float radians);
 int mat33_rc(int r, int c);
 int mat44_rc(int r, int c);
 
+mat22f_t mat22f_identity(void);
 mat33f_t mat33f_identity(void);
 mat34f_t mat34f_identity(void);
 mat44f_t mat44f_identity(void);
+
+mat22f_t mat22f_uniform_scale_from_float(float scale);
+mat22f_t mat22f_scale_from_floats(float scale_x, float scale_y);
+mat22f_t mat22f_scale_from_vec2f(vec2f_t scale_xy);
 
 mat33f_t mat33f_uniform_scale_from_float(float scale);
 mat33f_t mat33f_scale_from_floats(float scale_x, float scale_y, float scale_z);
@@ -101,6 +110,7 @@ mat34f_t mat34f_translation_from_floats(
   float translation_x, float translation_y, float translation_z);
 mat34f_t mat34f_translation_from_vec3f(vec3f_t translation);
 
+point2f_t mat22f_multiply_point2f(mat22f_t mat, point2f_t point);
 point3f_t mat33f_multiply_point3f(mat33f_t mat, point3f_t point);
 point3f_t mat34f_multiply_point3f(mat34f_t mat, point3f_t point);
 

@@ -27,6 +27,10 @@ float degrees_from_radians(const float radians) {
   return radians * (180.0f / k_pi);
 }
 
+mat22f_t mat22f_identity(void) {
+  return mat22f_uniform_scale_from_float(1.0f);
+}
+
 mat33f_t mat33f_identity(void) {
   return mat33f_uniform_scale_from_float(1.0f);
 }
@@ -37,6 +41,18 @@ mat44f_t mat44f_identity(void) {
 
 mat34f_t mat34f_identity(void) {
   return (mat34f_t){.elem = {[0] = 1.0f, [5] = 1.0f, [10] = 1.0f}};
+}
+
+mat22f_t mat22f_uniform_scale_from_float(const float scale) {
+  return mat22f_scale_from_floats(scale, scale);
+}
+
+mat22f_t mat22f_scale_from_floats(const float scale_x, const float scale_y) {
+  return (mat22f_t){.elem = {[0] = scale_x, [3] = scale_y}};
+}
+
+mat22f_t mat22f_scale_from_vec2f(const vec2f_t scale_xy) {
+  return mat22f_scale_from_floats(scale_xy.x, scale_xy.y);
 }
 
 mat33f_t mat33f_uniform_scale_from_float(const float scale) {
@@ -105,6 +121,12 @@ mat34f_t mat34f_translation_from_floats(
 mat34f_t mat34f_translation_from_vec3f(const vec3f_t translation) {
   return mat34f_translation_from_floats(
     translation.x, translation.y, translation.z);
+}
+
+point2f_t mat22f_multiply_point2f(const mat22f_t mat, const point2f_t point) {
+  return (point2f_t){
+    .x = mat.elem[0] * point.x + mat.elem[1] * point.y,
+    .y = mat.elem[2] * point.x + mat.elem[3] * point.y};
 }
 
 point3f_t mat33f_multiply_point3f(const mat33f_t mat, const point3f_t point) {
