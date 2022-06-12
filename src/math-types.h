@@ -79,8 +79,8 @@ typedef struct mat34f_t {
   float elem[12];
 } mat34f_t;
 
-float radians(float degrees);
-float degrees(float radians);
+float radians_from_degrees(float degrees);
+float degrees_from_radians(float radians);
 
 int mat33_rc(int r, int c);
 int mat44_rc(int r, int c);
@@ -103,6 +103,11 @@ mat34f_t mat34f_translation_from_vec3f(vec3f_t translation);
 
 point3f_t mat33f_multiply_point3f(mat33f_t mat, point3f_t point);
 point3f_t mat34f_multiply_point3f(mat34f_t mat, point3f_t point);
+
+mat33f_t mat33f_multiply_mat33f(mat33f_t lhs, mat33f_t rhs);
+mat34f_t mat34f_multiply_mat34f(mat34f_t lhs, mat34f_t rhs);
+mat34f_t mat33f_multiply_mat34f(mat33f_t lhs, mat34f_t rhs);
+mat34f_t mat34f_multiply_mat33f(mat34f_t lhs, mat33f_t rhs);
 
 int clampi(int value, int min, int max);
 float clampf(float value, float min, float max);

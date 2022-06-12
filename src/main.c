@@ -123,6 +123,12 @@ void update(void) {
   const mat33f_t rotation_x = mat33f_x_rotation_from_float(g_model.rotation.x);
   const mat33f_t rotation_y = mat33f_y_rotation_from_float(g_model.rotation.y);
   const mat33f_t rotation_z = mat33f_z_rotation_from_float(g_model.rotation.z);
+
+  const mat33f_t rotation = mat33f_multiply_mat33f(
+    rotation_z, mat33f_multiply_mat33f(rotation_y, rotation_x));
+  const mat34f_t model_transform = mat34f_multiply_mat33f(
+    mat34f_multiply_mat33f(translation, rotation), scale);
+
   for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
        ++i) {
     const face_t mesh_face = g_model.mesh.faces[i];
@@ -133,14 +139,8 @@ void update(void) {
 
     point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
-      const point3f_t scaled_vertex =
-        mat33f_multiply_point3f(scale, face_vertices[v]);
-      const point3f_t rotated_vertex = mat33f_multiply_point3f(
-        rotation_z,
-        mat33f_multiply_point3f(
-          rotation_y, mat33f_multiply_point3f(rotation_x, scaled_vertex)));
       transformed_vertices[v] =
-        mat34f_multiply_point3f(translation, rotated_vertex);
+        mat34f_multiply_point3f(model_transform, face_vertices[v]);
     }
 
     if (g_backface_culling) {

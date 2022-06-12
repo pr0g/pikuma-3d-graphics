@@ -19,11 +19,11 @@ int mat44_rc(const int r, const int c) {
   return mat_rc(r, c, 4);
 }
 
-float radians(const float degrees) {
+float radians_from_degrees(const float degrees) {
   return degrees * (k_pi / 180.0f);
 }
 
-float degrees(const float radians) {
+float degrees_from_radians(const float radians) {
   return radians * (180.0f / k_pi);
 }
 
@@ -122,6 +122,113 @@ point3f_t mat34f_multiply_point3f(const mat34f_t mat, const point3f_t point) {
        + mat.elem[7],
     .z = mat.elem[8] * point.x + mat.elem[9] * point.y + mat.elem[10] * point.z
        + mat.elem[11]};
+}
+
+mat33f_t mat33f_multiply_mat33f(const mat33f_t lhs, const mat33f_t rhs) {
+  return (mat33f_t){
+    .elem = {
+      [0] = lhs.elem[0] * rhs.elem[0] + lhs.elem[1] * rhs.elem[3]
+          + lhs.elem[2] * rhs.elem[6],
+      [1] = lhs.elem[0] * rhs.elem[1] + lhs.elem[1] * rhs.elem[4]
+          + lhs.elem[2] * rhs.elem[7],
+      [2] = lhs.elem[0] * rhs.elem[2] + lhs.elem[1] * rhs.elem[5]
+          + lhs.elem[2] * rhs.elem[8],
+      [3] = lhs.elem[3] * rhs.elem[0] + lhs.elem[4] * rhs.elem[3]
+          + lhs.elem[5] * rhs.elem[6],
+      [4] = lhs.elem[3] * rhs.elem[1] + lhs.elem[4] * rhs.elem[4]
+          + lhs.elem[5] * rhs.elem[7],
+      [5] = lhs.elem[3] * rhs.elem[2] + lhs.elem[4] * rhs.elem[5]
+          + lhs.elem[5] * rhs.elem[8],
+      [6] = lhs.elem[6] * rhs.elem[0] + lhs.elem[7] * rhs.elem[3]
+          + lhs.elem[8] * rhs.elem[6],
+      [7] = lhs.elem[6] * rhs.elem[1] + lhs.elem[7] * rhs.elem[4]
+          + lhs.elem[8] * rhs.elem[7],
+      [8] = lhs.elem[6] * rhs.elem[2] + lhs.elem[7] * rhs.elem[5]
+          + lhs.elem[8] * rhs.elem[8]}};
+}
+
+mat34f_t mat34f_multiply_mat34f(const mat34f_t lhs, const mat34f_t rhs) {
+  return (mat34f_t){
+    .elem = {
+      [0] = lhs.elem[0] * rhs.elem[0] + lhs.elem[1] * rhs.elem[4]
+          + lhs.elem[2] * rhs.elem[8],
+      [1] = lhs.elem[0] * rhs.elem[1] + lhs.elem[1] * rhs.elem[5]
+          + lhs.elem[2] * rhs.elem[9],
+      [2] = lhs.elem[0] * rhs.elem[2] + lhs.elem[1] * rhs.elem[6]
+          + lhs.elem[2] * rhs.elem[10],
+      [3] = lhs.elem[0] * rhs.elem[3] + lhs.elem[1] * rhs.elem[7]
+          + lhs.elem[2] * rhs.elem[11] + lhs.elem[3],
+      [4] = lhs.elem[4] * rhs.elem[0] + lhs.elem[5] * rhs.elem[4]
+          + lhs.elem[6] * rhs.elem[8],
+      [5] = lhs.elem[4] * rhs.elem[1] + lhs.elem[5] * rhs.elem[5]
+          + lhs.elem[6] * rhs.elem[9],
+      [6] = lhs.elem[4] * rhs.elem[2] + lhs.elem[5] * rhs.elem[6]
+          + lhs.elem[6] * rhs.elem[10],
+      [7] = lhs.elem[4] * rhs.elem[3] + lhs.elem[5] * rhs.elem[7]
+          + lhs.elem[6] * rhs.elem[11] + lhs.elem[7],
+      [8] = lhs.elem[8] * rhs.elem[0] + lhs.elem[9] * rhs.elem[4]
+          + lhs.elem[10] * rhs.elem[8],
+      [9] = lhs.elem[8] * rhs.elem[1] + lhs.elem[9] * rhs.elem[5]
+          + lhs.elem[10] * rhs.elem[9],
+      [10] = lhs.elem[8] * rhs.elem[2] + lhs.elem[9] * rhs.elem[6]
+           + lhs.elem[10] * rhs.elem[10],
+      [11] = lhs.elem[8] * rhs.elem[3] + lhs.elem[9] * rhs.elem[7]
+           + lhs.elem[10] * rhs.elem[11] + lhs.elem[11]}};
+}
+
+mat34f_t mat33f_multiply_mat34f(const mat33f_t lhs, const mat34f_t rhs) {
+  return (mat34f_t){
+    .elem = {
+      [0] = lhs.elem[0] * rhs.elem[0] + lhs.elem[1] * rhs.elem[4]
+          + lhs.elem[2] * rhs.elem[8],
+      [1] = lhs.elem[0] * rhs.elem[1] + lhs.elem[1] * rhs.elem[5]
+          + lhs.elem[2] * rhs.elem[9],
+      [2] = lhs.elem[0] * rhs.elem[2] + lhs.elem[1] * rhs.elem[6]
+          + lhs.elem[2] * rhs.elem[10],
+      [3] = lhs.elem[0] * rhs.elem[3] + lhs.elem[1] * rhs.elem[7]
+          + lhs.elem[2] * rhs.elem[11],
+      [4] = lhs.elem[3] * rhs.elem[0] + lhs.elem[4] * rhs.elem[4]
+          + lhs.elem[5] * rhs.elem[8],
+      [5] = lhs.elem[3] * rhs.elem[1] + lhs.elem[4] * rhs.elem[5]
+          + lhs.elem[5] * rhs.elem[9],
+      [6] = lhs.elem[3] * rhs.elem[2] + lhs.elem[4] * rhs.elem[6]
+          + lhs.elem[5] * rhs.elem[10],
+      [7] = lhs.elem[3] * rhs.elem[3] + lhs.elem[4] * rhs.elem[7]
+          + lhs.elem[5] * rhs.elem[11],
+      [8] = lhs.elem[6] * rhs.elem[0] + lhs.elem[7] * rhs.elem[4]
+          + lhs.elem[8] * rhs.elem[8],
+      [9] = lhs.elem[6] * rhs.elem[1] + lhs.elem[7] * rhs.elem[5]
+          + lhs.elem[8] * rhs.elem[9],
+      [10] = lhs.elem[6] * rhs.elem[2] + lhs.elem[7] * rhs.elem[6]
+           + lhs.elem[8] * rhs.elem[10],
+      [11] = lhs.elem[6] * rhs.elem[3] + lhs.elem[7] * rhs.elem[7]
+           + lhs.elem[8] * rhs.elem[11]}};
+}
+
+mat34f_t mat34f_multiply_mat33f(const mat34f_t lhs, const mat33f_t rhs) {
+  return (mat34f_t){
+    .elem = {
+      [0] = lhs.elem[0] * rhs.elem[0] + lhs.elem[1] * rhs.elem[3]
+          + lhs.elem[2] * rhs.elem[6],
+      [1] = lhs.elem[0] * rhs.elem[1] + lhs.elem[1] * rhs.elem[4]
+          + lhs.elem[2] * rhs.elem[7],
+      [2] = lhs.elem[0] * rhs.elem[2] + lhs.elem[1] * rhs.elem[5]
+          + lhs.elem[2] * rhs.elem[8],
+      [3] = lhs.elem[3],
+      [4] = lhs.elem[4] * rhs.elem[0] + lhs.elem[5] * rhs.elem[3]
+          + lhs.elem[6] * rhs.elem[6],
+      [5] = lhs.elem[4] * rhs.elem[1] + lhs.elem[5] * rhs.elem[4]
+          + lhs.elem[6] * rhs.elem[7],
+      [6] = lhs.elem[4] * rhs.elem[2] + lhs.elem[5] * rhs.elem[5]
+          + lhs.elem[6] * rhs.elem[8],
+      [7] = lhs.elem[7],
+      [8] = lhs.elem[8] * rhs.elem[0] + lhs.elem[9] * rhs.elem[3]
+          + lhs.elem[10] * rhs.elem[6],
+      [9] = lhs.elem[8] * rhs.elem[1] + lhs.elem[9] * rhs.elem[4]
+          + lhs.elem[10] * rhs.elem[7],
+      [10] = lhs.elem[8] * rhs.elem[2] + lhs.elem[9] * rhs.elem[5]
+           + lhs.elem[10] * rhs.elem[8],
+      [11] = lhs.elem[11]}};
 }
 
 int clampi(const int value, const int min, const int max) {
