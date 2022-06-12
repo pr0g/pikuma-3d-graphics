@@ -17,13 +17,6 @@ typedef struct vec3f_t {
   float z;
 } vec3f_t;
 
-typedef struct vec4f_t {
-  float x;
-  float y;
-  float z;
-  float w;
-} vec4f_t;
-
 typedef struct vec2i_t {
   int x;
   int y;
@@ -45,6 +38,13 @@ typedef struct point3f_t {
   float y;
   float z;
 } point3f_t;
+
+typedef struct point4f_t {
+  float x;
+  float y;
+  float z;
+  float w;
+} point4f_t;
 
 typedef struct point2i_t {
   int x;
@@ -108,6 +108,13 @@ mat33f_t mat33f_multiply_mat33f(mat33f_t lhs, mat33f_t rhs);
 mat34f_t mat34f_multiply_mat34f(mat34f_t lhs, mat34f_t rhs);
 mat34f_t mat33f_multiply_mat34f(mat33f_t lhs, mat34f_t rhs);
 mat34f_t mat34f_multiply_mat33f(mat34f_t lhs, mat33f_t rhs);
+mat44f_t mat44f_multiply_mat44f(mat44f_t lhs, mat44f_t rhs);
+
+mat44f_t mat44f_perspective_projection(
+  float aspect_ratio, float fov, float near, float far);
+
+point4f_t mat44f_multiply_point4f(mat44f_t mat, point4f_t point);
+point4f_t mat44f_project_point3f(mat44f_t projection, point3f_t point);
 
 int clampi(int value, int min, int max);
 float clampf(float value, float min, float max);
@@ -115,12 +122,12 @@ float clampf(float value, float min, float max);
 int maxi(int lhs, int rhs);
 float maxf(float lhs, float rhs);
 
-// vec4f vec4f_from_vec3f(...)
-
 vec2f_t vec2f_from_point2f(point2f_t point);
 vec3f_t vec3f_from_point3f(point3f_t point);
 point2f_t point2f_from_vec2f(vec2f_t vec);
 point3f_t point3f_from_vec3f(vec3f_t vec);
+point4f_t point4f_from_point3f(point3f_t point);
+point2f_t point2f_from_point4f(point4f_t point);
 
 point2f_t point2f_from_point2i(point2i_t point);
 point2i_t point2i_from_point2f(point2f_t point);

@@ -21,10 +21,16 @@ uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_filled_wireframe;
 bool g_backface_culling = true;
+mat44f_t g_perspective_projection;
 
 void setup(void) {
   create_color_buffer();
   load_obj_file_data("assets/f22.obj");
+  g_perspective_projection = mat44f_perspective_projection(
+    (float)window_width() / (float)window_height(),
+    radians_from_degrees(60.0f),
+    0.1f,
+    100.0f);
 }
 
 bool process_input(void) {
@@ -115,7 +121,7 @@ void update(void) {
   // vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
   g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
   g_model.translation =
-    vec3f_add_vec3f(g_model.translation, (vec3f_t){0.0f, 0.01f, 0.0f});
+    vec3f_add_vec3f(g_model.translation, (vec3f_t){0.01f, 0.0f, 0.0f});
 
   const mat33f_t scale = mat33f_scale_from_vec3f(g_model.scale);
   const mat34f_t translation =
@@ -165,11 +171,22 @@ void update(void) {
        + transformed_vertices[2].z)
       / 3;
 
+    point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
+      projected_points[v] = mat44f_project_point3f(
+        g_perspective_projection, transformed_vertices[v]);
+
+      projected_points[v].x *= (float)window_width() / 2.0f;
+      projected_points[v].y *= (float)window_height() / 2.0f;
+
+      projected_triangle.points[v] =
+        point2i_from_point2f(point2f_from_point4f(projected_points[v]));
+
       projected_triangle.points[v] = point2i_add_vec2i(
-        projecti(transformed_vertices[v], 640.0f),
+        projected_triangle.points[v],
         (vec2i_t){window_width() / 2, window_height() / 2});
     }
+
     array_push(g_triangles_to_render, projected_triangle);
   }
 
