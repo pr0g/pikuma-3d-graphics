@@ -2,6 +2,11 @@
 
 #include <math.h>
 
+const float k_pi = 3.14159265358979323846f;
+const float k_half_pi = 1.57079632679489661923f;
+const float k_two_pi = 6.28318530717958647692f;
+const float k_tau = 6.28318530717958647692f;
+
 static int mat_rc(const int r, const int c, const int d) {
   return r * d + c;
 }
@@ -12,6 +17,14 @@ int mat33_rc(const int r, const int c) {
 
 int mat44_rc(const int r, const int c) {
   return mat_rc(r, c, 4);
+}
+
+float radians(const float degrees) {
+  return degrees * (k_pi / 180.0f);
+}
+
+float degrees(const float radians) {
+  return radians * (180.0f / k_pi);
 }
 
 mat33f_t mat33f_identity(void) {
@@ -37,6 +50,42 @@ mat33f_t mat33f_scale_from_floats(
 
 mat33f_t mat33f_scale_from_vec3f(const vec3f_t scale_xyz) {
   return mat33f_scale_from_floats(scale_xyz.x, scale_xyz.y, scale_xyz.z);
+}
+
+mat33f_t mat33f_x_rotation_from_float(const float rotation_radians) {
+  const float cos_rotation = cosf(rotation_radians);
+  const float sin_rotation = sinf(rotation_radians);
+  return (mat33f_t){
+    .elem = {
+      [0] = 1.0f,
+      [4] = cos_rotation,
+      [5] = -sin_rotation,
+      [7] = sin_rotation,
+      [8] = cos_rotation}};
+}
+
+mat33f_t mat33f_y_rotation_from_float(const float rotation_radians) {
+  const float cos_rotation = cosf(rotation_radians);
+  const float sin_rotation = sinf(rotation_radians);
+  return (mat33f_t){
+    .elem = {
+      [0] = cos_rotation,
+      [2] = sin_rotation,
+      [4] = 1.0f,
+      [6] = -sin_rotation,
+      [8] = cos_rotation}};
+}
+
+mat33f_t mat33f_z_rotation_from_float(const float rotation_radians) {
+  const float cos_rotation = cosf(rotation_radians);
+  const float sin_rotation = sinf(rotation_radians);
+  return (mat33f_t){
+    .elem = {
+      [0] = cos_rotation,
+      [1] = -sin_rotation,
+      [3] = sin_rotation,
+      [4] = cos_rotation,
+      [8] = 1.0f}};
 }
 
 mat34f_t mat34f_translation_from_floats(

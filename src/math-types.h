@@ -1,6 +1,11 @@
 #ifndef MATH_TYPES_H
 #define MATH_TYPES_H
 
+extern const float k_pi;
+extern const float k_half_pi;
+extern const float k_two_pi;
+extern const float k_tau;
+
 typedef struct vec2f_t {
   float x;
   float y;
@@ -74,6 +79,9 @@ typedef struct mat34f_t {
   float elem[12];
 } mat34f_t;
 
+float radians(float degrees);
+float degrees(float radians);
+
 int mat33_rc(int r, int c);
 int mat44_rc(int r, int c);
 
@@ -84,6 +92,10 @@ mat44f_t mat44f_identity(void);
 mat33f_t mat33f_uniform_scale_from_float(float scale);
 mat33f_t mat33f_scale_from_floats(float scale_x, float scale_y, float scale_z);
 mat33f_t mat33f_scale_from_vec3f(vec3f_t scale_xyz);
+
+mat33f_t mat33f_x_rotation_from_float(float rotation_radians);
+mat33f_t mat33f_y_rotation_from_float(float rotation_radians);
+mat33f_t mat33f_z_rotation_from_float(float rotation_radians);
 
 mat34f_t mat34f_translation_from_floats(
   float translation_x, float translation_y, float translation_z);
