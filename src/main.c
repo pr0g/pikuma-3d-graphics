@@ -183,7 +183,7 @@ void update(void) {
 
       const point2f_t projected_point = mat22f_multiply_point2f(
         mat22f_scale_from_floats(
-          (float)window_width() / 2.0f, (float)window_height() / 2.0f),
+          (float)window_width() / 2.0f, (float)window_height() / -2.0f),
         point2f_from_point4f(projected_points[v]));
 
       projected_triangle.points[v] = point2i_add_vec2i(
