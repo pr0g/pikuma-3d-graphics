@@ -1,3 +1,6 @@
+#ifndef FPS_H
+#define FPS_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -12,3 +15,5 @@ typedef struct {
 } Fps;
 
 int64_t calculate_window(Fps* fps, int64_t now);
+
+#endif // FPS_H

@@ -11,4 +11,4 @@ void* array_hold(void* array, int count, int item_size);
 int array_length(void* array);
 void array_free(void* array);
 
-#endif
+#endif // ARRAY_H

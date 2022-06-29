@@ -24,4 +24,4 @@ extern model_t g_model;
 void load_cube_mesh_data(void);
 void load_obj_file_data(const char* filename);
 
-#endif
+#endif // MESH_H
