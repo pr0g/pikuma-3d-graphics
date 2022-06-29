@@ -23,7 +23,7 @@ Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_filled_wireframe;
 bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
-const vec3f_t g_light_direction = {0.0f, 0.0f, -1.0f};
+const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
 
 void setup(void) {
   create_color_buffer();
@@ -174,7 +174,7 @@ void update(void) {
        + transformed_vertices[2].z)
       / 3;
     projected_triangle.color = apply_light_intensity(
-      0xffffff, vec3f_dot_vec3f(normal, g_light_direction));
+      0xffffff, -vec3f_dot_vec3f(normal, g_light_direction));
 
     point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
