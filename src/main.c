@@ -3,6 +3,7 @@
 #include "array.h"
 #include "display.h"
 #include "fps.h"
+#include "lighting.h"
 #include "math-types.h"
 #include "mesh.h"
 
@@ -16,12 +17,13 @@ typedef enum display_mode_e {
 } display_mode_e;
 
 projected_triangle_t* g_triangles_to_render = NULL;
-point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
+const point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_filled_wireframe;
 bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
+const vec3f_t g_light_direction = {0.0f, 0.0f, -1.0f};
 
 void setup(void) {
   create_color_buffer();
@@ -119,9 +121,9 @@ void update(void) {
   g_model.rotation =
     vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
   // vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
-  g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
-  g_model.translation =
-    vec3f_add_vec3f(g_model.translation, (vec3f_t){0.01f, 0.0f, 0.0f});
+  // g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
+  // g_model.translation =
+  //   vec3f_add_vec3f(g_model.translation, (vec3f_t){0.01f, 0.0f, 0.0f});
 
   const mat33f_t scale = mat33f_scale_from_vec3f(g_model.scale);
   const mat34f_t translation =
@@ -139,9 +141,9 @@ void update(void) {
        ++i) {
     const face_t mesh_face = g_model.mesh.faces[i];
     const point3f_t face_vertices[] = {
-      [0] = g_model.mesh.vertices[mesh_face.indices[0] - 1],
-      [1] = g_model.mesh.vertices[mesh_face.indices[1] - 1],
-      [2] = g_model.mesh.vertices[mesh_face.indices[2] - 1]};
+      g_model.mesh.vertices[mesh_face.indices[0] - 1],
+      g_model.mesh.vertices[mesh_face.indices[1] - 1],
+      g_model.mesh.vertices[mesh_face.indices[2] - 1]};
 
     point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
@@ -149,6 +151,7 @@ void update(void) {
         mat34f_multiply_point3f(model_transform, face_vertices[v]);
     }
 
+    uint32_t color = 0xffffff00;
     if (g_backface_culling) {
       const point3f_t a = transformed_vertices[0];
       const point3f_t b = transformed_vertices[1];
@@ -163,6 +166,8 @@ void update(void) {
       if (view_dot < 0.0f) {
         continue;
       }
+      color = apply_light_intensity(
+        color, vec3f_dot_vec3f(normal, g_light_direction));
     }
 
     projected_triangle_t projected_triangle;
@@ -170,6 +175,7 @@ void update(void) {
       (transformed_vertices[0].z + transformed_vertices[1].z
        + transformed_vertices[2].z)
       / 3;
+    projected_triangle.color = color;
 
     point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
@@ -204,10 +210,12 @@ void render(void) {
        ++i) {
     switch (g_display_mode) {
       case display_mode_filled:
-        draw_filled_triangle(g_triangles_to_render[i], 0xff00ffff);
+        draw_filled_triangle(
+          g_triangles_to_render[i], g_triangles_to_render[i].color);
         break;
       case display_mode_filled_wireframe:
-        draw_filled_triangle(g_triangles_to_render[i], 0xff00ffff);
+        draw_filled_triangle(
+          g_triangles_to_render[i], g_triangles_to_render[i].color);
         draw_wire_triangle(g_triangles_to_render[i], 0xff000000);
         break;
       case display_mode_wireframe_vertices: {
