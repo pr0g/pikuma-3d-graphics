@@ -86,6 +86,7 @@ typedef struct mat34f_t {
 float radians_from_degrees(float degrees);
 float degrees_from_radians(float radians);
 
+int mat22_rc(int r, int c);
 int mat33_rc(int r, int c);
 int mat44_rc(int r, int c);
 

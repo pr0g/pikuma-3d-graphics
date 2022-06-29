@@ -11,6 +11,10 @@ static int mat_rc(const int r, const int c, const int d) {
   return r * d + c;
 }
 
+int mat22_rc(const int r, const int c) {
+  return mat_rc(r, c, 2);
+}
+
 int mat33_rc(const int r, const int c) {
   return mat_rc(r, c, 3);
 }
