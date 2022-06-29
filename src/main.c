@@ -151,7 +151,7 @@ void update(void) {
         mat34f_multiply_point3f(model_transform, face_vertices[v]);
     }
 
-    uint32_t color = 0xffffff00;
+    uint32_t color = 0xffffffff;
     if (g_backface_culling) {
       const point3f_t a = transformed_vertices[0];
       const point3f_t b = transformed_vertices[1];
