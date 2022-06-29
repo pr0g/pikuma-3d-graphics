@@ -151,23 +151,21 @@ void update(void) {
         mat34f_multiply_point3f(model_transform, face_vertices[v]);
     }
 
-    uint32_t color = 0xffffffff;
+    const point3f_t a = transformed_vertices[0];
+    const point3f_t b = transformed_vertices[1];
+    const point3f_t c = transformed_vertices[2];
+    const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
+    const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
+    const vec3f_t normal =
+      vec3f_normalized(vec3f_cross_vec3f(edge_ab, edge_ac));
+
     if (g_backface_culling) {
-      const point3f_t a = transformed_vertices[0];
-      const point3f_t b = transformed_vertices[1];
-      const point3f_t c = transformed_vertices[2];
-      const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
-      const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
-      const vec3f_t normal =
-        vec3f_normalized(vec3f_cross_vec3f(edge_ab, edge_ac));
       const vec3f_t camera_direction =
         point3f_sub_point3f(g_camera_position, a);
       const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
       if (view_dot < 0.0f) {
         continue;
       }
-      color = apply_light_intensity(
-        color, vec3f_dot_vec3f(normal, g_light_direction));
     }
 
     projected_triangle_t projected_triangle;
@@ -175,7 +173,8 @@ void update(void) {
       (transformed_vertices[0].z + transformed_vertices[1].z
        + transformed_vertices[2].z)
       / 3;
-    projected_triangle.color = color;
+    projected_triangle.color = apply_light_intensity(
+      0xffffff, vec3f_dot_vec3f(normal, g_light_direction));
 
     point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
