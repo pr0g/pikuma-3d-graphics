@@ -12,7 +12,7 @@ model_t g_model = {
   .rotation = (vec3f_t){0.0f, 0.0f, 0.0f},
   .translation = (vec3f_t){0.0f, 0.0f, 5.0f}};
 
-const point3f_t g_cube_vertices[] = { // cube
+static const point3f_t g_cube_vertices[] = {
   {.x = -1.0f, .y = -1.0f, .z = -1.0f},
   {.x = -1.0f, .y = 1.0f, .z = -1.0f},
   {.x = 1.0f, .y = 1.0f, .z = -1.0f},
@@ -22,25 +22,31 @@ const point3f_t g_cube_vertices[] = { // cube
   {.x = -1.0f, .y = 1.0f, .z = 1.0f},
   {.x = -1.0f, .y = -1.0f, .z = 1.0f}};
 
-const face_t g_cube_faces[] = {
+static const tex2f_t g_cube_uvs[] = {
+  {.u = 1.0f, .v = 0.0f},
+  {.u = 0.0f, .v = 0.0f},
+  {.u = 1.0f, .v = 1.0f},
+  {.u = 0.0f, .v = 1.0f}};
+
+static const face_t g_cube_faces[] = {
   // front
-  {.indices = {1, 2, 3}},
-  {.indices = {1, 3, 4}},
+  {.vert_indices = {1, 2, 3}, .uv_indices = {2, 4, 3}},
+  {.vert_indices = {1, 3, 4}, .uv_indices = {2, 3, 1}},
   // right
-  {.indices = {4, 3, 5}},
-  {.indices = {4, 5, 6}},
+  {.vert_indices = {4, 3, 5}, .uv_indices = {2, 4, 3}},
+  {.vert_indices = {4, 5, 6}, .uv_indices = {2, 3, 1}},
   // back
-  {.indices = {6, 5, 7}},
-  {.indices = {6, 7, 8}},
+  {.vert_indices = {6, 5, 7}, .uv_indices = {2, 4, 3}},
+  {.vert_indices = {6, 7, 8}, .uv_indices = {2, 3, 1}},
   // left
-  {.indices = {8, 7, 2}},
-  {.indices = {8, 2, 1}},
+  {.vert_indices = {8, 7, 2}, .uv_indices = {2, 4, 3}},
+  {.vert_indices = {8, 2, 1}, .uv_indices = {2, 3, 1}},
   // top
-  {.indices = {2, 7, 5}},
-  {.indices = {2, 5, 3}},
+  {.vert_indices = {2, 7, 5}, .uv_indices = {2, 4, 3}},
+  {.vert_indices = {2, 5, 3}, .uv_indices = {2, 3, 1}},
   // bottom
-  {.indices = {6, 8, 1}},
-  {.indices = {6, 1, 4}}};
+  {.vert_indices = {6, 8, 1}, .uv_indices = {2, 4, 3}},
+  {.vert_indices = {6, 1, 4}, .uv_indices = {2, 3, 1}}};
 
 void load_cube_mesh_data(void) {
   for (int i = 0; i < CubeVertexCount; ++i) {
@@ -49,6 +55,10 @@ void load_cube_mesh_data(void) {
 
   for (int i = 0; i < CubeFaceCount; ++i) {
     array_push(g_model.mesh.faces, g_cube_faces[i]);
+  }
+
+  for (int i = 0; i < CubeUvCount; ++i) {
+    array_push(g_model.mesh.uvs, g_cube_uvs[i]);
   }
 }
 
@@ -83,7 +93,7 @@ void load_obj_file_data(const char* filename) {
         char temp[32];
         memcpy(temp, token, len);
         temp[len] = '\0';
-        face.indices[i++] = atoi(temp);
+        face.vert_indices[i++] = atoi(temp);
         token = strtok(NULL, separator);
       }
       array_push(g_model.mesh.faces, face);

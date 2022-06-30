@@ -6,6 +6,7 @@
 #include "lighting.h"
 #include "math-types.h"
 #include "mesh.h"
+#include "texture.h"
 
 #include <assert.h>
 
@@ -13,7 +14,9 @@ typedef enum display_mode_e {
   display_mode_wireframe_vertices,
   display_mode_wireframe,
   display_mode_filled,
-  display_mode_filled_wireframe
+  display_mode_filled_wireframe,
+  display_mode_textured,
+  display_mode_textured_wireframe
 } display_mode_e;
 
 projected_triangle_t* g_triangles_to_render = NULL;
@@ -27,7 +30,8 @@ const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
 
 void setup(void) {
   create_color_buffer();
-  load_obj_file_data("assets/f22.obj");
+  // load_obj_file_data("assets/f22.obj");
+  load_cube_mesh_data();
   g_perspective_projection = mat44f_perspective_projection(
     (float)window_width() / (float)window_height(),
     radians_from_degrees(60.0f),
@@ -53,6 +57,10 @@ bool process_input(void) {
         g_display_mode = display_mode_filled;
       } else if (event.key.keysym.sym == SDLK_4) {
         g_display_mode = display_mode_filled_wireframe;
+      } else if (event.key.keysym.sym == SDLK_5) {
+        g_display_mode = display_mode_textured;
+      } else if (event.key.keysym.sym == SDLK_6) {
+        g_display_mode = display_mode_textured_wireframe;
       } else if (event.key.keysym.sym == SDLK_c) {
         g_backface_culling = !g_backface_culling;
       }
@@ -141,9 +149,9 @@ void update(void) {
        ++i) {
     const face_t mesh_face = g_model.mesh.faces[i];
     const point3f_t face_vertices[] = {
-      g_model.mesh.vertices[mesh_face.indices[0] - 1],
-      g_model.mesh.vertices[mesh_face.indices[1] - 1],
-      g_model.mesh.vertices[mesh_face.indices[2] - 1]};
+      g_model.mesh.vertices[mesh_face.vert_indices[0] - 1],
+      g_model.mesh.vertices[mesh_face.vert_indices[1] - 1],
+      g_model.mesh.vertices[mesh_face.vert_indices[2] - 1]};
 
     point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
@@ -168,13 +176,16 @@ void update(void) {
       }
     }
 
-    projected_triangle_t projected_triangle;
-    projected_triangle.average_depth =
-      (transformed_vertices[0].z + transformed_vertices[1].z
-       + transformed_vertices[2].z)
-      / 3;
-    projected_triangle.color = apply_light_intensity(
-      0xffffff, -vec3f_dot_vec3f(normal, g_light_direction));
+    projected_triangle_t projected_triangle = {
+      .average_depth = (transformed_vertices[0].z + transformed_vertices[1].z
+                        + transformed_vertices[2].z)
+                     / 3,
+      .color = apply_light_intensity(
+        0xffffff, -vec3f_dot_vec3f(normal, g_light_direction)),
+      .uvs = {
+        g_model.mesh.uvs[mesh_face.uv_indices[0] - 1],
+        g_model.mesh.uvs[mesh_face.uv_indices[1] - 1],
+        g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}};
 
     point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
@@ -218,6 +229,7 @@ void render(void) {
         draw_wire_triangle(g_triangles_to_render[i], 0xff000000);
         break;
       case display_mode_wireframe_vertices: {
+        draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
         for (int p = 0; p < 3; ++p) {
           const point2i_t point = g_triangles_to_render[i].points[p];
           draw_rect(
@@ -226,10 +238,16 @@ void render(void) {
               (size2i_t){.width = 5, .height = 5}},
             0xffffffff);
         }
-      }
-      // fallthrough
+      } break;
       case display_mode_wireframe:
         draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
+        break;
+      case display_mode_textured:
+        draw_textured_triangle(g_triangles_to_render[i], NULL);
+        break;
+      case display_mode_textured_wireframe:
+        draw_textured_triangle(g_triangles_to_render[i], NULL);
+        draw_wire_triangle(g_triangles_to_render[i], 0xff000000);
         break;
     }
   }

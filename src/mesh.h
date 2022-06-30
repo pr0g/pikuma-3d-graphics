@@ -2,13 +2,16 @@
 #define MESH_H
 
 #include "math-types.h"
+#include "texture.h"
 #include "triangle.h"
 
 #define CubeVertexCount 8
 #define CubeFaceCount 12
+#define CubeUvCount 4
 
 typedef struct mesh_t {
   point3f_t* vertices;
+  tex2f_t* uvs;
   face_t* faces;
 } mesh_t;
 

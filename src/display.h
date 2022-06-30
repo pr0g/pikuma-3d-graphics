@@ -31,6 +31,8 @@ void draw_rect(struct rect_t rect, uint32_t color);
 void draw_line(struct point2i_t p0, struct point2i_t p1, uint32_t color);
 void draw_wire_triangle(struct projected_triangle_t triangle, uint32_t color);
 void draw_filled_triangle(struct projected_triangle_t triangle, uint32_t color);
+void draw_textured_triangle(
+  struct projected_triangle_t triangle, const uint32_t* texture);
 
 void render_color_buffer(void);
 void clear_color_buffer(const uint32_t color);

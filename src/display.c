@@ -207,6 +207,11 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
   }
 }
 
+void draw_textured_triangle(
+  const projected_triangle_t triangle, const uint32_t* texture) {
+  // todo
+}
+
 void clear_color_buffer(const uint32_t color) {
   for (int col = 0; col < s_window_width; ++col) {
     for (int row = 0; row < s_window_height; ++row) {
