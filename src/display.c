@@ -185,17 +185,10 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
     sizeof triangle.points / sizeof *triangle.points,
     sizeof(point2f_t),
     compare_point2f);
-
   if (triangle.points[1].y == triangle.points[2].y) {
-    fill_flat_bottom_triangle(
-      (projected_triangle_t){
-        .points = {triangle.points[0], triangle.points[1], triangle.points[2]}},
-      color);
+    fill_flat_bottom_triangle(triangle, color);
   } else if (triangle.points[0].y == triangle.points[1].y) {
-    fill_flat_top_triangle(
-      (projected_triangle_t){
-        .points = {triangle.points[0], triangle.points[1], triangle.points[2]}},
-      color);
+    fill_flat_top_triangle(triangle, color);
   } else {
     const int my = triangle.points[1].y;
     const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
@@ -243,6 +236,18 @@ static void texture_triangle(
   }
 }
 
+static void texture_flat_bottom_triangle(
+  const projected_triangle_t triangle, const uint32_t color) {
+  texture_triangle(
+    triangle.points[0], triangle.points[1], triangle.points[2], 1.0f, color);
+}
+
+static void texture_flat_top_triangle(
+  const projected_triangle_t triangle, const uint32_t color) {
+  texture_triangle(
+    triangle.points[2], triangle.points[0], triangle.points[1], -1.0f, color);
+}
+
 void draw_textured_triangle(
   projected_triangle_t triangle, const uint32_t* texture) {
   qsort(
@@ -250,12 +255,18 @@ void draw_textured_triangle(
     sizeof triangle.points / sizeof *triangle.points,
     sizeof(point2f_t),
     compare_point2f);
-
-  texture_triangle(
-    triangle.points[0],
-    triangle.points[1],
-    triangle.points[2],
-    1.0f,
+  const int my = triangle.points[1].y;
+  const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
+                   * (triangle.points[1].y - triangle.points[0].y))
+                  / (float)(triangle.points[2].y - triangle.points[0].y))
+               + triangle.points[0].x;
+  fill_flat_bottom_triangle(
+    (projected_triangle_t){
+      .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
+    0xffff00ff);
+  fill_flat_top_triangle(
+    (projected_triangle_t){
+      .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
     0xffff00ff);
 }
 
