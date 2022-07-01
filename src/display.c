@@ -219,7 +219,7 @@ static void texture_triangle(
   float x_start = (float)start.x;
   float x_end = (float)start.x;
   const int delta_y = abs(left.y - start.y);
-  for (int y = 0; y < delta_y; y++) {
+  for (int y = 0; y <= delta_y; y++) {
     const float yy = (float)start.y + (float)y * scale;
     const int delta_x = (int)(roundf(x_end) - roundf(x_start));
     const int side_length = abs(delta_x);
@@ -260,11 +260,11 @@ void draw_textured_triangle(
                    * (triangle.points[1].y - triangle.points[0].y))
                   / (float)(triangle.points[2].y - triangle.points[0].y))
                + triangle.points[0].x;
-  fill_flat_bottom_triangle(
+  texture_flat_bottom_triangle(
     (projected_triangle_t){
       .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
     0xffff00ff);
-  fill_flat_top_triangle(
+  texture_flat_top_triangle(
     (projected_triangle_t){
       .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
     0xffff00ff);
