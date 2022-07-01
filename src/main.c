@@ -243,10 +243,12 @@ void render(void) {
         draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
         break;
       case display_mode_textured:
-        draw_textured_triangle(g_triangles_to_render[i], NULL);
+        draw_textured_triangle(
+          g_triangles_to_render[i], redbrick_texture_as_uint32());
         break;
       case display_mode_textured_wireframe:
-        draw_textured_triangle(g_triangles_to_render[i], NULL);
+        draw_textured_triangle(
+          g_triangles_to_render[i], redbrick_texture_as_uint32());
         draw_wire_triangle(g_triangles_to_render[i], 0xff000000);
         break;
     }

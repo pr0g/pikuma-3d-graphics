@@ -34,6 +34,18 @@ double seconds_elapsed(
        / (double)SDL_GetPerformanceFrequency();
 }
 
+void swapf(float* lhs, float* rhs) {
+  float temp = *lhs;
+  *lhs = *rhs;
+  *rhs = temp;
+}
+
+static void swapi(int* lhs, int* rhs) {
+  int temp = *lhs;
+  *lhs = *rhs;
+  *rhs = temp;
+}
+
 bool initialize_window(void) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL.\n");
@@ -131,12 +143,6 @@ static int compare_point2f(const void* lhs, const void* rhs) {
   return 0;
 }
 
-static void swap_int(int* lhs, int* rhs) {
-  int temp = *lhs;
-  *lhs = *rhs;
-  *rhs = temp;
-}
-
 static void fill_triangle(
   const point2i_t start,
   const point2i_t left,
@@ -207,9 +213,50 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
   }
 }
 
+static void texture_triangle(
+  const point2i_t start,
+  const point2i_t left,
+  const point2i_t right,
+  const float scale,
+  const uint32_t color) {
+  const float inv_slope1 =
+    ((float)(left.x - start.x) / (float)(left.y - start.y)) * scale;
+  const float inv_slope2 =
+    ((float)(right.x - start.x) / (float)(right.y - start.y)) * scale;
+  float x_start = (float)start.x;
+  float x_end = (float)start.x;
+  const int delta_y = abs(left.y - start.y);
+  for (int y = 0; y < delta_y; y++) {
+    const float yy = (float)start.y + (float)y * scale;
+    const int delta_x = (int)(roundf(x_end) - roundf(x_start));
+    const int side_length = abs(delta_x);
+    if (side_length != 0) {
+      const float inc = (float)delta_x / (float)side_length;
+      float current = x_start;
+      for (int x = 0; x <= side_length; ++x) {
+        draw_pixel(point2i_from_point2f((point2f_t){current, yy}), color);
+        current += inc;
+      }
+    }
+    x_start += inv_slope1;
+    x_end += inv_slope2;
+  }
+}
+
 void draw_textured_triangle(
-  const projected_triangle_t triangle, const uint32_t* texture) {
-  // todo
+  projected_triangle_t triangle, const uint32_t* texture) {
+  qsort(
+    triangle.points,
+    sizeof triangle.points / sizeof *triangle.points,
+    sizeof(point2f_t),
+    compare_point2f);
+
+  texture_triangle(
+    triangle.points[0],
+    triangle.points[1],
+    triangle.points[2],
+    1.0f,
+    0xffff00ff);
 }
 
 void clear_color_buffer(const uint32_t color) {
