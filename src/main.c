@@ -23,7 +23,7 @@ projected_triangle_t* g_triangles_to_render = NULL;
 const point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
-display_mode_e g_display_mode = display_mode_filled_wireframe;
+display_mode_e g_display_mode = display_mode_textured;
 bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
 const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
@@ -182,10 +182,10 @@ void update(void) {
                      / 3,
       .color = apply_light_intensity(
         0xffffff, -vec3f_dot_vec3f(normal, g_light_direction)),
-      .uvs = {
-        g_model.mesh.uvs[mesh_face.uv_indices[0] - 1],
-        g_model.mesh.uvs[mesh_face.uv_indices[1] - 1],
-        g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}};
+      .vertices = {
+        {.uv = g_model.mesh.uvs[mesh_face.uv_indices[0] - 1]},
+        {.uv = g_model.mesh.uvs[mesh_face.uv_indices[1] - 1]},
+        {.uv = g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}}};
 
     point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
@@ -197,7 +197,7 @@ void update(void) {
           (float)window_width() / 2.0f, (float)window_height() / -2.0f),
         point2f_from_point4f(projected_points[v]));
 
-      projected_triangle.points[v] = point2i_add_vec2i(
+      projected_triangle.vertices[v].point = point2i_add_vec2i(
         point2i_from_point2f(projected_point),
         (vec2i_t){window_width() / 2, window_height() / 2});
     }
@@ -231,7 +231,7 @@ void render(void) {
       case display_mode_wireframe_vertices: {
         draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
         for (int p = 0; p < 3; ++p) {
-          const point2i_t point = g_triangles_to_render[i].points[p];
+          const point2i_t point = g_triangles_to_render[i].vertices[p].point;
           draw_rect(
             (rect_t){
               (point2i_t){.x = point.x - 2, .y = point.y - 2},

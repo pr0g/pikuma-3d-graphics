@@ -34,18 +34,6 @@ double seconds_elapsed(
        / (double)SDL_GetPerformanceFrequency();
 }
 
-void swapf(float* lhs, float* rhs) {
-  float temp = *lhs;
-  *lhs = *rhs;
-  *rhs = temp;
-}
-
-static void swapi(int* lhs, int* rhs) {
-  int temp = *lhs;
-  *lhs = *rhs;
-  *rhs = temp;
-}
-
 bool initialize_window(void) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     fprintf(stderr, "Error initializing SDL.\n");
@@ -92,6 +80,19 @@ void draw_pixel(const point2i_t point, const uint32_t color) {
   s_color_buffer[point.y * s_window_width + point.x] = color;
 }
 
+void draw_texel(
+  const point2i_t point, const tex2f_t uv, const uint32_t* texture) {
+  const point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
+    (size2i_t){
+      .width = redbrick_texture_width() - 1,
+      .height = redbrick_texture_height() - 1},
+    uv);
+  draw_pixel(
+    point,
+    texture
+      [texture_coordinate.y * redbrick_texture_width() + texture_coordinate.x]);
+}
+
 void draw_grid(const int spacing, const uint32_t color) {
   for (int grid_col = 0; grid_col < s_window_width; grid_col += spacing) {
     for (int row = 0; row < s_window_height; ++row) {
@@ -127,17 +128,20 @@ void draw_line(const point2i_t p0, const point2i_t p1, const uint32_t color) {
 void draw_wire_triangle(
   const projected_triangle_t triangle, const uint32_t color) {
   for (int v = 0; v < 3; ++v) {
-    draw_line(triangle.points[v], triangle.points[((v + 1) % 3)], color);
+    draw_line(
+      triangle.vertices[v].point,
+      triangle.vertices[((v + 1) % 3)].point,
+      color);
   }
 }
 
-static int compare_point2f(const void* lhs, const void* rhs) {
-  const point2f_t arg1 = *(const point2f_t*)(lhs);
-  const point2f_t arg2 = *(const point2f_t*)(rhs);
-  if (arg1.y < arg2.y) {
+static int compare_projected_vertex(const void* lhs, const void* rhs) {
+  const projected_vertex_t arg1 = *(const projected_vertex_t*)(lhs);
+  const projected_vertex_t arg2 = *(const projected_vertex_t*)(rhs);
+  if (arg1.point.y < arg2.point.y) {
     return -1;
   }
-  if (arg1.y > arg2.y) {
+  if (arg1.point.y > arg2.point.y) {
     return 1;
   }
   return 0;
@@ -170,38 +174,52 @@ static void fill_triangle(
 static void fill_flat_bottom_triangle(
   const projected_triangle_t triangle, const uint32_t color) {
   fill_triangle(
-    triangle.points[0], triangle.points[1], triangle.points[2], 1.0f, color);
+    triangle.vertices[0].point,
+    triangle.vertices[1].point,
+    triangle.vertices[2].point,
+    1.0f,
+    color);
 }
 
 static void fill_flat_top_triangle(
   const projected_triangle_t triangle, const uint32_t color) {
   fill_triangle(
-    triangle.points[2], triangle.points[0], triangle.points[1], -1.0f, color);
+    triangle.vertices[2].point,
+    triangle.vertices[0].point,
+    triangle.vertices[1].point,
+    -1.0f,
+    color);
 }
 
 void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
   qsort(
-    triangle.points,
-    sizeof triangle.points / sizeof *triangle.points,
-    sizeof(point2f_t),
-    compare_point2f);
-  if (triangle.points[1].y == triangle.points[2].y) {
+    triangle.vertices,
+    sizeof triangle.vertices / sizeof *triangle.vertices,
+    sizeof(projected_vertex_t),
+    compare_projected_vertex);
+  if (triangle.vertices[1].point.y == triangle.vertices[2].point.y) {
     fill_flat_bottom_triangle(triangle, color);
-  } else if (triangle.points[0].y == triangle.points[1].y) {
+  } else if (triangle.vertices[0].point.y == triangle.vertices[1].point.y) {
     fill_flat_top_triangle(triangle, color);
   } else {
-    const int my = triangle.points[1].y;
-    const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
-                   * (triangle.points[1].y - triangle.points[0].y))
-                  / (float)(triangle.points[2].y - triangle.points[0].y))
-               + triangle.points[0].x;
+    const int mid_y = triangle.vertices[1].point.y;
+    const int mid_x = (int)((float)((triangle.vertices[2].point.x - triangle.vertices[0].point.x)
+                   * (triangle.vertices[1].point.y - triangle.vertices[0].point.y))
+                  / (float)(triangle.vertices[2].point.y - triangle.vertices[0].point.y))
+               + triangle.vertices[0].point.x;
     fill_flat_bottom_triangle(
       (projected_triangle_t){
-        .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
+        .vertices =
+          {{.point = triangle.vertices[0].point},
+           {.point = triangle.vertices[1].point},
+           {.point = (point2i_t){.x = mid_x, .y = mid_y}}}},
       color);
     fill_flat_top_triangle(
       (projected_triangle_t){
-        .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
+        .vertices =
+          {{.point = triangle.vertices[1].point},
+           {.point = (point2i_t){.x = mid_x, .y = mid_y}},
+           {.point = triangle.vertices[2].point}}},
       color);
   }
 }
@@ -210,8 +228,11 @@ static void texture_triangle(
   const point2i_t start,
   const point2i_t left,
   const point2i_t right,
+  const tex2f_t start_uv,
+  const tex2f_t left_uv,
+  const tex2f_t right_uv,
   const float direction,
-  const uint32_t color) {
+  const uint32_t* texture) {
   const float inv_slope1 =
     ((float)(left.x - start.x) / (float)(left.y - start.y)) * direction;
   const float inv_slope2 =
@@ -227,7 +248,13 @@ static void texture_triangle(
       const float inc = (float)delta_x / (float)side_length;
       float current_x = x_start;
       for (int x = 0; x <= side_length; ++x) {
-        draw_pixel(point2i_from_point2f((point2f_t){current_x, current_y}), color);
+        const point2i_t point =
+          point2i_from_point2f((point2f_t){current_x, current_y});
+        const barycentric_coords_t barycentric_coords =
+          calculate_barycentric_coordinates(start, left, right, point);
+        const tex2f_t uv =
+          calculate_uv(barycentric_coords, start_uv, left_uv, right_uv);
+        draw_texel(point, uv, texture);
         current_x += inc;
       }
     }
@@ -237,37 +264,59 @@ static void texture_triangle(
 }
 
 static void texture_flat_bottom_triangle(
-  const projected_triangle_t triangle, const uint32_t color) {
+  const projected_triangle_t triangle, const uint32_t* texture) {
   texture_triangle(
-    triangle.points[0], triangle.points[1], triangle.points[2], 1.0f, color);
+    triangle.vertices[0].point,
+    triangle.vertices[1].point,
+    triangle.vertices[2].point,
+    triangle.vertices[0].uv,
+    triangle.vertices[1].uv,
+    triangle.vertices[2].uv,
+    1.0f,
+    texture);
 }
 
 static void texture_flat_top_triangle(
-  const projected_triangle_t triangle, const uint32_t color) {
+  const projected_triangle_t triangle, const uint32_t* texture) {
   texture_triangle(
-    triangle.points[2], triangle.points[0], triangle.points[1], -1.0f, color);
+    triangle.vertices[2].point,
+    triangle.vertices[0].point,
+    triangle.vertices[1].point,
+    triangle.vertices[2].uv,
+    triangle.vertices[0].uv,
+    triangle.vertices[1].uv,
+    -1.0f,
+    texture);
 }
 
 void draw_textured_triangle(
   projected_triangle_t triangle, const uint32_t* texture) {
   qsort(
-    triangle.points,
-    sizeof triangle.points / sizeof *triangle.points,
-    sizeof(point2f_t),
-    compare_point2f);
-  const int my = triangle.points[1].y;
-  const int mx = (int)((float)((triangle.points[2].x - triangle.points[0].x)
-                   * (triangle.points[1].y - triangle.points[0].y))
-                  / (float)(triangle.points[2].y - triangle.points[0].y))
-               + triangle.points[0].x;
+    triangle.vertices,
+    sizeof triangle.vertices / sizeof *triangle.vertices,
+    sizeof(projected_vertex_t),
+    compare_projected_vertex);
+  const int mid_y = triangle.vertices[1].point.y;
+  const int mid_x = (int)((float)((triangle.vertices[2].point.x - triangle.vertices[0].point.x)
+                   * (triangle.vertices[1].point.y - triangle.vertices[0].point.y))
+                  / (float)(triangle.vertices[2].point.y - triangle.vertices[0].point.y))
+               + triangle.vertices[0].point.x;
   texture_flat_bottom_triangle(
     (projected_triangle_t){
-      .points = {triangle.points[0], triangle.points[1], {.x = mx, .y = my}}},
-    0xffff00ff);
+      .vertices =
+        {{.point = triangle.vertices[0].point, .uv = triangle.vertices[0].uv},
+         {.point = triangle.vertices[1].point, .uv = triangle.vertices[1].uv},
+         {.point = (point2i_t){.x = mid_x, .y = mid_y},
+          .uv = triangle.vertices[2].uv}}},
+    texture);
   texture_flat_top_triangle(
     (projected_triangle_t){
-      .points = {triangle.points[1], {.x = mx, .y = my}, triangle.points[2]}},
-    0xffff00ff);
+      .vertices =
+        {{.point = triangle.vertices[1].point, .uv = triangle.vertices[1].uv},
+         {.point = (point2i_t){.x = mid_x, .y = mid_y},
+          .uv = triangle.vertices[0].uv},
+         {.point = triangle.vertices[2].point, .uv = triangle.vertices[2].uv}}},
+    texture);
 }
 
 void clear_color_buffer(const uint32_t color) {

@@ -1,5 +1,8 @@
 #include "texture.h"
 
+#include "triangle.h"
+
+#include <math.h>
 #include <stdio.h>
 
 barycentric_coords_t calculate_barycentric_coordinates(
@@ -19,6 +22,25 @@ barycentric_coords_t calculate_barycentric_coordinates(
     / triangle_area;
   const float gamma = 1.0f - alpha - beta;
   return (barycentric_coords_t){.alpha = alpha, .beta = beta, .gamma = gamma};
+}
+
+tex2f_t calculate_uv(
+  const barycentric_coords_t barycentric_coords,
+  const tex2f_t uv0,
+  const tex2f_t uv1,
+  const tex2f_t uv2) {
+  return (tex2f_t){
+    .u = uv0.u * barycentric_coords.alpha + uv1.u * barycentric_coords.beta
+       + uv2.u * barycentric_coords.gamma,
+    .v = uv0.v * barycentric_coords.alpha + uv1.v * barycentric_coords.beta
+       + uv2.v * barycentric_coords.gamma};
+}
+
+point2i_t point2i_at_proportion_of_size2i(
+  const size2i_t size, const tex2f_t uv) {
+  return (point2i_t){
+    (int)roundf((float)size.width * uv.u),
+    (int)roundf((float)size.height * uv.v)};
 }
 
 int redbrick_texture_width(void) {

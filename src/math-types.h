@@ -83,6 +83,9 @@ typedef struct mat34f_t {
   float elem[12];
 } mat34f_t;
 
+void swapf(float* lhs, float* rhs);
+void swapi(int* lhs, int* rhs);
+
 float radians_from_degrees(float degrees);
 float degrees_from_radians(float radians);
 
@@ -132,6 +135,9 @@ float clampf(float value, float min, float max);
 
 int maxi(int lhs, int rhs);
 float maxf(float lhs, float rhs);
+
+int mini(int lhs, int rhs);
+int minf(float lhs, float rhs);
 
 vec2f_t vec2f_from_point2f(point2f_t point);
 vec3f_t vec3f_from_point3f(point3f_t point);

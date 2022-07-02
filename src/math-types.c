@@ -7,6 +7,18 @@ const float k_half_pi = 1.57079632679489661923f;
 const float k_two_pi = 6.28318530717958647692f;
 const float k_tau = 6.28318530717958647692f;
 
+void swapf(float* lhs, float* rhs) {
+  float temp = *lhs;
+  *lhs = *rhs;
+  *rhs = temp;
+}
+
+void swapi(int* lhs, int* rhs) {
+  int temp = *lhs;
+  *lhs = *rhs;
+  *rhs = temp;
+}
+
 static int mat_rc(const int r, const int c, const int d) {
   return r * d + c;
 }
@@ -364,6 +376,20 @@ float maxf(const float lhs, const float rhs) {
 
 int maxi(const int lhs, const int rhs) {
   if (lhs > rhs) {
+    return lhs;
+  }
+  return rhs;
+}
+
+int mini(const int lhs, const int rhs) {
+  if (lhs < rhs) {
+    return lhs;
+  }
+  return rhs;
+}
+
+int minf(const float lhs, const float rhs) {
+  if (lhs < rhs) {
     return lhs;
   }
   return rhs;
