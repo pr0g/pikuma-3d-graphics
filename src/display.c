@@ -157,10 +157,10 @@ static void fill_triangle(
   float x_end = (float)start.x;
   const int delta = abs(left.y - start.y);
   for (int y = 0; y <= delta; y++) {
-    const float yy = (float)start.y + (float)y * direction;
+    const float current_y = (float)start.y + (float)y * direction;
     draw_line(
-      point2i_from_point2f((point2f_t){x_start, yy}),
-      point2i_from_point2f((point2f_t){x_end, yy}),
+      point2i_from_point2f((point2f_t){x_start, current_y}),
+      point2i_from_point2f((point2f_t){x_end, current_y}),
       color);
     x_start += inv_slope1;
     x_end += inv_slope2;
@@ -220,15 +220,15 @@ static void texture_triangle(
   float x_end = (float)start.x;
   const int delta_y = abs(left.y - start.y);
   for (int y = 0; y <= delta_y; y++) {
-    const float yy = (float)start.y + (float)y * direction;
+    const float current_y = (float)start.y + (float)y * direction;
     const int delta_x = (int)(roundf(x_end) - roundf(x_start));
     const int side_length = abs(delta_x);
     if (side_length != 0) {
       const float inc = (float)delta_x / (float)side_length;
-      float current = x_start;
+      float current_x = x_start;
       for (int x = 0; x <= side_length; ++x) {
-        draw_pixel(point2i_from_point2f((point2f_t){current, yy}), color);
-        current += inc;
+        draw_pixel(point2i_from_point2f((point2f_t){current_x, current_y}), color);
+        current_x += inc;
       }
     }
     x_start += inv_slope1;
