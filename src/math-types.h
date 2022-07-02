@@ -191,6 +191,7 @@ point3f_t point3f_rotate_y(point3f_t point, float angle);
 point3f_t point3f_rotate_z(point3f_t point, float angle);
 
 vec3f_t vec3f_cross_vec3f(vec3f_t lhs, vec3f_t rhs);
+float vec2f_wedge_vec2f(vec2f_t lhs, vec2f_t rhs);
 
 float vec2f_dot_vec2f(vec2f_t lhs, vec2f_t rhs);
 float vec3f_dot_vec3f(vec3f_t lhs, vec3f_t rhs);

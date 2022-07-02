@@ -572,6 +572,10 @@ vec3f_t vec3f_cross_vec3f(const vec3f_t lhs, const vec3f_t rhs) {
     lhs.x * rhs.y - lhs.y * rhs.x};
 }
 
+float vec2f_wedge_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
+  return lhs.x * rhs.y - lhs.y * rhs.x;
+}
+
 float vec2f_dot_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
   return lhs.x * rhs.x + lhs.y * rhs.y;
 }

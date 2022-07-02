@@ -2,6 +2,25 @@
 
 #include <stdio.h>
 
+barycentric_coords_t calculate_barycentric_coordinates(
+  const point2i_t a, const point2i_t b, const point2i_t c, const point2i_t p) {
+  const vec2i_t ab = point2i_sub_point2i(b, a);
+  const vec2i_t bc = point2i_sub_point2i(c, b);
+  const vec2i_t ac = point2i_sub_point2i(c, a);
+  const vec2i_t ap = point2i_sub_point2i(p, a);
+  const vec2i_t bp = point2i_sub_point2i(p, b);
+  const float triangle_area =
+    vec2f_wedge_vec2f(vec2f_from_vec2i(ab), vec2f_from_vec2i(ac));
+  const float alpha =
+    vec2f_wedge_vec2f(vec2f_from_vec2i(bc), vec2f_from_vec2i(bp))
+    / triangle_area;
+  const float beta =
+    vec2f_wedge_vec2f(vec2f_from_vec2i(ap), vec2f_from_vec2i(ac))
+    / triangle_area;
+  const float gamma = 1.0f - alpha - beta;
+  return (barycentric_coords_t){.alpha = alpha, .beta = beta, .gamma = gamma};
+}
+
 int redbrick_texture_width(void) {
   return 64;
 }
