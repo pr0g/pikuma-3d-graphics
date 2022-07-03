@@ -82,18 +82,41 @@ void load_obj_file_data(const char* filename) {
         token = strtok(NULL, separator);
       }
       array_push(g_model.mesh.vertices, vertex);
+    } else if (strncmp(line, "vt ", 3) == 0) {
+      line += 3;
+      char* token = strtok(line, separator);
+      tex2f_t uv = {};
+      float* uvs[] = {[0] = &uv.u, [1] = &uv.v};
+      int i = 0;
+      while (token != NULL) {
+        *uvs[i++] = atof(token);
+        token = strtok(NULL, separator);
+      }
+      array_push(g_model.mesh.uvs, uv);
     } else if (strncmp(line, "f ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
       face_t face = {};
-      int i = 0;
+      int v = 0;
+      int uv = 0;
       while (token != NULL) {
-        const char* slash = strchr(token, '/');
-        const int len = slash - token;
-        char temp[32];
-        memcpy(temp, token, len);
-        temp[len] = '\0';
-        face.vert_indices[i++] = atoi(temp);
+        {
+          const char* slash = strchr(token, '/');
+          const int len = slash - token;
+          char temp[32];
+          memcpy(temp, token, len);
+          temp[len] = '\0';
+          face.vert_indices[v++] = atoi(temp);
+          token += len + 1;
+        }
+        {
+          const char* slash = strchr(token, '/');
+          const int len = slash - token;
+          char temp[32];
+          memcpy(temp, token, len);
+          temp[len] = '\0';
+          face.uv_indices[uv++] = atoi(temp);
+        }
         token = strtok(NULL, separator);
       }
       array_push(g_model.mesh.faces, face);
