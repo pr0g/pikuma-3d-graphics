@@ -51,7 +51,7 @@ bool initialize_window(void) {
     SDL_WINDOWPOS_CENTERED,
     s_window_width,
     s_window_height,
-    0 /*SDL_WINDOW_BORDERLESS*/);
+    SDL_WINDOW_BORDERLESS);
 
   if (!s_window) {
     fprintf(stderr, "Error creating SDL window.\n");
@@ -64,9 +64,6 @@ bool initialize_window(void) {
     fprintf(stderr, "Error creating SDL renderer.\n");
     return false;
   }
-
-  // disable fullscreen
-  // SDL_SetWindowFullscreen(s_window, SDL_WINDOW_FULLSCREEN);
 
   return true;
 }
@@ -82,15 +79,17 @@ void draw_pixel(const point2i_t point, const uint32_t color) {
 
 void draw_texel(
   const point2i_t point, const tex2f_t uv, const uint32_t* texture) {
+  const tex2f_t clamped_uv =
+    (tex2f_t){clampf(uv.u, 0.0f, 1.0f), clampf(uv.v, 0.0f, 1.0f)};
   const point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
     (size2i_t){
       .width = redbrick_texture_width() - 1,
       .height = redbrick_texture_height() - 1},
-    uv);
+    clamped_uv);
   draw_pixel(
     point,
     texture
-      [texture_coordinate.y * redbrick_texture_width() + texture_coordinate.x]);
+      [(redbrick_texture_height() - 1 - texture_coordinate.y) * redbrick_texture_width() + texture_coordinate.x]);
 }
 
 void draw_grid(const int spacing, const uint32_t color) {
@@ -224,71 +223,6 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
   }
 }
 
-static void texture_triangle(
-  const point2i_t start,
-  const point2i_t left,
-  const point2i_t right,
-  const tex2f_t start_uv,
-  const tex2f_t left_uv,
-  const tex2f_t right_uv,
-  const float direction,
-  const uint32_t* texture) {
-  const float inv_slope1 =
-    ((float)(left.x - start.x) / (float)(left.y - start.y)) * direction;
-  const float inv_slope2 =
-    ((float)(right.x - start.x) / (float)(right.y - start.y)) * direction;
-  float x_start = (float)start.x;
-  float x_end = (float)start.x;
-  const int delta_y = abs(left.y - start.y);
-  for (int y = 0; y <= delta_y; y++) {
-    const float current_y = (float)start.y + (float)y * direction;
-    const int delta_x = (int)(roundf(x_end) - roundf(x_start));
-    const int side_length = abs(delta_x);
-    if (side_length != 0) {
-      const float inc = (float)delta_x / (float)side_length;
-      float current_x = x_start;
-      for (int x = 0; x <= side_length; ++x) {
-        const point2i_t point =
-          point2i_from_point2f((point2f_t){current_x, current_y});
-        const barycentric_coords_t barycentric_coords =
-          calculate_barycentric_coordinates(start, left, right, point);
-        const tex2f_t uv =
-          calculate_uv(barycentric_coords, start_uv, left_uv, right_uv);
-        draw_texel(point, uv, texture);
-        current_x += inc;
-      }
-    }
-    x_start += inv_slope1;
-    x_end += inv_slope2;
-  }
-}
-
-static void texture_flat_bottom_triangle(
-  const projected_triangle_t triangle, const uint32_t* texture) {
-  texture_triangle(
-    triangle.vertices[0].point,
-    triangle.vertices[1].point,
-    triangle.vertices[2].point,
-    triangle.vertices[0].uv,
-    triangle.vertices[1].uv,
-    triangle.vertices[2].uv,
-    1.0f,
-    texture);
-}
-
-static void texture_flat_top_triangle(
-  const projected_triangle_t triangle, const uint32_t* texture) {
-  texture_triangle(
-    triangle.vertices[2].point,
-    triangle.vertices[0].point,
-    triangle.vertices[1].point,
-    triangle.vertices[2].uv,
-    triangle.vertices[0].uv,
-    triangle.vertices[1].uv,
-    -1.0f,
-    texture);
-}
-
 void draw_textured_triangle(
   projected_triangle_t triangle, const uint32_t* texture) {
   qsort(
@@ -296,27 +230,99 @@ void draw_textured_triangle(
     sizeof triangle.vertices / sizeof *triangle.vertices,
     sizeof(projected_vertex_t),
     compare_projected_vertex);
-  const int mid_y = triangle.vertices[1].point.y;
-  const int mid_x = (int)((float)((triangle.vertices[2].point.x - triangle.vertices[0].point.x)
-                   * (triangle.vertices[1].point.y - triangle.vertices[0].point.y))
-                  / (float)(triangle.vertices[2].point.y - triangle.vertices[0].point.y))
-               + triangle.vertices[0].point.x;
-  texture_flat_bottom_triangle(
-    (projected_triangle_t){
-      .vertices =
-        {{.point = triangle.vertices[0].point, .uv = triangle.vertices[0].uv},
-         {.point = triangle.vertices[1].point, .uv = triangle.vertices[1].uv},
-         {.point = (point2i_t){.x = mid_x, .y = mid_y},
-          .uv = triangle.vertices[2].uv}}},
-    texture);
-  texture_flat_top_triangle(
-    (projected_triangle_t){
-      .vertices =
-        {{.point = triangle.vertices[1].point, .uv = triangle.vertices[1].uv},
-         {.point = (point2i_t){.x = mid_x, .y = mid_y},
-          .uv = triangle.vertices[0].uv},
-         {.point = triangle.vertices[2].point, .uv = triangle.vertices[2].uv}}},
-    texture);
+
+  float inv_slope_1 = 0.0f;
+  float inv_slope_2 = 0.0f;
+  if (triangle.vertices[1].point.y - triangle.vertices[0].point.y != 0) {
+    inv_slope_1 =
+      (float)(triangle.vertices[1].point.x - triangle.vertices[0].point.x)
+      / (float)abs(triangle.vertices[1].point.y - triangle.vertices[0].point.y);
+  }
+  if (triangle.vertices[2].point.y - triangle.vertices[0].point.y != 0) {
+    inv_slope_2 =
+      (float)(triangle.vertices[2].point.x - triangle.vertices[0].point.x)
+      / (float)abs(triangle.vertices[2].point.y - triangle.vertices[0].point.y);
+  }
+
+  if (triangle.vertices[1].point.y - triangle.vertices[0].point.y != 0) {
+    for (int y = triangle.vertices[0].point.y;
+         y <= triangle.vertices[1].point.y;
+         y++) {
+      int x_start =
+        triangle.vertices[1].point.x
+        + (int)((float)(y - triangle.vertices[1].point.y) * inv_slope_1);
+      int x_end =
+        triangle.vertices[0].point.x
+        + (int)((float)(y - triangle.vertices[0].point.y) * inv_slope_2);
+
+      if (x_end < x_start) {
+        swapi(&x_start, &x_end); // swap if x_start is to the right of x_end
+      }
+
+      for (int x = x_start; x <= x_end; x++) {
+        const point2i_t point = (point2i_t){x, y};
+        const barycentric_coords_t barycentric_coords =
+          calculate_barycentric_coordinates(
+            triangle.vertices[0].point,
+            triangle.vertices[1].point,
+            triangle.vertices[2].point,
+            point);
+        const tex2f_t uv = calculate_uv(
+          barycentric_coords,
+          triangle.vertices[0].uv,
+          triangle.vertices[1].uv,
+          triangle.vertices[2].uv);
+        draw_texel(point, uv, texture);
+      }
+    }
+  }
+
+  inv_slope_1 = 0.0f;
+  inv_slope_2 = 0.0f;
+
+  if (triangle.vertices[2].point.y - triangle.vertices[1].point.y != 0) {
+    inv_slope_1 =
+      (float)(triangle.vertices[2].point.x - triangle.vertices[1].point.x)
+      / (float)abs(triangle.vertices[2].point.y - triangle.vertices[1].point.y);
+  }
+  if (triangle.vertices[2].point.y - triangle.vertices[0].point.y != 0) {
+    inv_slope_2 =
+      (float)(triangle.vertices[2].point.x - triangle.vertices[0].point.x)
+      / (float)abs(triangle.vertices[2].point.y - triangle.vertices[0].point.y);
+  }
+
+  if (triangle.vertices[2].point.y - triangle.vertices[1].point.y != 0) {
+    for (int y = triangle.vertices[1].point.y;
+         y <= triangle.vertices[2].point.y;
+         y++) {
+      int x_start =
+        triangle.vertices[1].point.x
+        + (int)((float)(y - triangle.vertices[1].point.y) * inv_slope_1);
+      int x_end =
+        triangle.vertices[0].point.x
+        + (int)((float)(y - triangle.vertices[0].point.y) * inv_slope_2);
+
+      if (x_end < x_start) {
+        swapi(&x_start, &x_end);
+      }
+
+      for (int x = x_start; x <= x_end; x++) {
+        const point2i_t point = (point2i_t){x, y};
+        const barycentric_coords_t barycentric_coords =
+          calculate_barycentric_coordinates(
+            triangle.vertices[0].point,
+            triangle.vertices[1].point,
+            triangle.vertices[2].point,
+            point);
+        const tex2f_t uv = calculate_uv(
+          barycentric_coords,
+          triangle.vertices[0].uv,
+          triangle.vertices[1].uv,
+          triangle.vertices[2].uv);
+        draw_texel(point, uv, texture);
+      }
+    }
+  }
 }
 
 void clear_color_buffer(const uint32_t color) {
