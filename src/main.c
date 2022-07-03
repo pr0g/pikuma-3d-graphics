@@ -266,6 +266,7 @@ void render(void) {
 }
 
 void teardown(void) {
+  upng_free(g_texture.png_texture);
   array_free(g_model.mesh.faces);
   array_free(g_model.mesh.vertices);
   destroy_color_buffer();
