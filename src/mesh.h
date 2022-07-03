@@ -25,6 +25,6 @@ typedef struct model_t {
 extern model_t g_model;
 
 void load_cube_mesh_data(void);
-void load_obj_file_data(const char* filename);
+void load_obj_mesh_data(const char* filename);
 
 #endif // MESH_H

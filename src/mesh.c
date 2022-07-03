@@ -62,7 +62,7 @@ void load_cube_mesh_data(void) {
   }
 }
 
-void load_obj_file_data(const char* filename) {
+void load_obj_mesh_data(const char* filename) {
   FILE* file = fopen(filename, "r");
 
   char buffer[128];
