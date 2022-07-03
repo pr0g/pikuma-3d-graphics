@@ -83,7 +83,7 @@ void draw_texel(
   const tex2f_t clamped_uv = (tex2f_t){
     clampf(wrapped_uv.u, 0.0f, 1.0f), clampf(wrapped_uv.v, 0.0f, 1.0f)};
   const point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
-    (size2i_t){.width = texture.width, .height = texture.height}, clamped_uv);
+    (size2i_t){.width = texture.width - 1, .height = texture.height - 1}, clamped_uv);
   draw_pixel(
     point,
     texture.color_buffer
