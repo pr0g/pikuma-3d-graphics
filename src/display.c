@@ -79,11 +79,15 @@ void draw_pixel(const point2i_t point, const uint32_t color) {
 
 void draw_texel(
   const point2i_t point, const tex2f_t uv, const texture_t texture) {
-  const tex2f_t wrapped_uv = (tex2f_t){fmodf(uv.u, 1.0f), fmodf(uv.v, 1.0f)};
+  const tex2f_t wrapped_uv = (tex2f_t){
+    uv.u - 1.0f > 0.0f ? fmodf(uv.u, 1.0f) : uv.u,
+    uv.v - 1.0f > 0.0f ? fmodf(uv.v, 1.0f) : uv.v};
   const tex2f_t clamped_uv = (tex2f_t){
     clampf(wrapped_uv.u, 0.0f, 1.0f), clampf(wrapped_uv.v, 0.0f, 1.0f)};
-  const point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
-    (size2i_t){.width = texture.width - 1, .height = texture.height - 1}, clamped_uv);
+  point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
+    (size2i_t){.width = texture.width, .height = texture.height}, clamped_uv);
+  texture_coordinate.x = clampf(texture_coordinate.x, 0, texture.width - 1);
+  texture_coordinate.y = clampf(texture_coordinate.y, 0, texture.height - 1);
   draw_pixel(
     point,
     texture.color_buffer

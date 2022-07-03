@@ -48,8 +48,8 @@ tex2f_t calculate_uv(
 point2i_t point2i_at_proportion_of_size2i(
   const size2i_t size, const tex2f_t uv) {
   return (point2i_t){
-    (int)roundf((float)size.width * uv.u),
-    (int)roundf((float)size.height * uv.v)};
+    (int)floorf((float)size.width * uv.u),
+    (int)floorf((float)size.height * uv.v)};
 }
 
 texture_t load_png_texture_data(const char* filename) {

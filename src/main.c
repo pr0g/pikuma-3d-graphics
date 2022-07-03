@@ -32,14 +32,14 @@ texture_t g_texture;
 
 void setup(void) {
   create_color_buffer();
-  load_obj_mesh_data("assets/f22.obj");
+  load_obj_mesh_data("assets/cube.obj");
   // load_cube_mesh_data();
   g_perspective_projection = mat44f_perspective_projection(
     (float)window_width() / (float)window_height(),
     radians_from_degrees(60.0f),
     0.1f,
     100.0f);
-  g_texture = load_png_texture_data("assets/f22.png");
+  g_texture = load_png_texture_data("assets/redbrick.png");
 }
 
 bool process_input(void) {
