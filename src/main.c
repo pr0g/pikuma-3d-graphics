@@ -7,6 +7,7 @@
 #include "math-types.h"
 #include "mesh.h"
 #include "texture.h"
+#include "upng/upng.h"
 
 #include <assert.h>
 
@@ -27,6 +28,7 @@ display_mode_e g_display_mode = display_mode_textured;
 bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
 const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
+texture_t g_texture;
 
 void setup(void) {
   create_color_buffer();
@@ -37,6 +39,7 @@ void setup(void) {
     radians_from_degrees(60.0f),
     0.1f,
     100.0f);
+  g_texture = load_png_texture_data("assets/cube.png");
 }
 
 bool process_input(void) {
@@ -244,12 +247,10 @@ void render(void) {
         draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
         break;
       case display_mode_textured:
-        draw_textured_triangle(
-          g_triangles_to_render[i], redbrick_texture_as_uint32());
+        draw_textured_triangle(g_triangles_to_render[i], g_texture);
         break;
       case display_mode_textured_wireframe:
-        draw_textured_triangle(
-          g_triangles_to_render[i], redbrick_texture_as_uint32());
+        draw_textured_triangle(g_triangles_to_render[i], g_texture);
         draw_wire_triangle(g_triangles_to_render[i], 0xffffffff);
         break;
     }

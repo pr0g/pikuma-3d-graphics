@@ -22,7 +22,8 @@ target_sources(
           src/triangle.c
           src/array.c
           src/lighting.c
-          src/texture.c)
+          src/texture.c
+          third-party/upng/upng.c)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 target_compile_options(
   ${PROJECT_NAME}
@@ -36,6 +37,7 @@ target_compile_options(
           -Wextra
           -pedantic>)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2::SDL2main)
+target_include_directories(${PROJECT_NAME} PRIVATE third-party)
 
 add_custom_target(
   run

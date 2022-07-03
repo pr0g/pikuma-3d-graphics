@@ -14,6 +14,7 @@ struct point3f_t;
 struct rect_t;
 struct projected_triangle_t;
 struct tex2f_t;
+struct texture_t;
 
 int32_t fps(void);
 int32_t frame_target_time(void);
@@ -28,14 +29,14 @@ void destroy_color_buffer(void);
 
 void draw_pixel(struct point2i_t point, uint32_t color);
 void draw_texel(
-  struct point2i_t point, struct tex2f_t uv, const uint32_t* texture);
+  struct point2i_t point, struct tex2f_t uv, struct texture_t texture);
 void draw_grid(int spacing, uint32_t color);
 void draw_rect(struct rect_t rect, uint32_t color);
 void draw_line(struct point2i_t p0, struct point2i_t p1, uint32_t color);
 void draw_wire_triangle(struct projected_triangle_t triangle, uint32_t color);
 void draw_filled_triangle(struct projected_triangle_t triangle, uint32_t color);
 void draw_textured_triangle(
-  struct projected_triangle_t triangle, const uint32_t* texture);
+  struct projected_triangle_t triangle, struct texture_t texture);
 
 void render_color_buffer(void);
 void clear_color_buffer(const uint32_t color);

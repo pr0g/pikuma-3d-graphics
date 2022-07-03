@@ -78,19 +78,16 @@ void draw_pixel(const point2i_t point, const uint32_t color) {
 }
 
 void draw_texel(
-  const point2i_t point, const tex2f_t uv, const uint32_t* texture) {
+  const point2i_t point, const tex2f_t uv, const texture_t texture) {
   const tex2f_t clamped_uv =
     (tex2f_t){clampf(uv.u, 0.0f, 1.0f), clampf(uv.v, 0.0f, 1.0f)};
   const point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
-    (size2i_t){
-      .width = redbrick_texture_width() - 1,
-      .height = redbrick_texture_height() - 1},
+    (size2i_t){.width = texture.width - 1, .height = texture.height - 1},
     clamped_uv);
   draw_pixel(
     point,
-    texture
-      [(redbrick_texture_height() - 1 - texture_coordinate.y)
-         * redbrick_texture_width()
+    texture.color_buffer
+      [(texture.height - 1 - texture_coordinate.y) * texture.width
        + texture_coordinate.x]);
 }
 
@@ -226,7 +223,7 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
 }
 
 void draw_textured_triangle(
-  projected_triangle_t triangle, const uint32_t* texture) {
+  projected_triangle_t triangle, const texture_t texture) {
   qsort(
     triangle.vertices,
     sizeof triangle.vertices / sizeof *triangle.vertices,
@@ -354,7 +351,7 @@ void create_color_buffer(void) {
   s_color_buffer = malloc(sizeof(uint32_t) * s_window_width * s_window_height);
   s_color_buffer_texture = SDL_CreateTexture(
     s_renderer,
-    SDL_PIXELFORMAT_ARGB8888,
+    SDL_PIXELFORMAT_RGBA32,
     SDL_TEXTUREACCESS_STREAMING,
     s_window_width,
     s_window_height);

@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include "math-types.h"
+#include "upng/upng.h"
 
 #include <stdint.h>
 
@@ -17,6 +18,13 @@ typedef struct barycentric_coords_t {
   float beta;
   float gamma;
 } barycentric_coords_t;
+
+typedef struct texture_t {
+  upng_t* png_texture;
+  uint32_t* color_buffer;
+  int width;
+  int height;
+} texture_t;
 
 tex2f_t tex2f_div_scalar(tex2f_t tex, float scale);
 
@@ -34,8 +42,6 @@ tex2f_t calculate_uv(
 
 point2i_t point2i_at_proportion_of_size2i(size2i_t size, tex2f_t uv);
 
-int redbrick_texture_width(void);
-int redbrick_texture_height(void);
-uint32_t* redbrick_texture_as_uint32(void);
+texture_t load_png_texture_data(const char* filename);
 
 #endif // TEXTURE_H
