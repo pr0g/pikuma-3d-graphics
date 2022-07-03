@@ -89,7 +89,9 @@ void draw_texel(
   draw_pixel(
     point,
     texture
-      [(redbrick_texture_height() - 1 - texture_coordinate.y) * redbrick_texture_width() + texture_coordinate.x]);
+      [(redbrick_texture_height() - 1 - texture_coordinate.y)
+         * redbrick_texture_width()
+       + texture_coordinate.x]);
 }
 
 void draw_grid(const int spacing, const uint32_t color) {
@@ -231,29 +233,27 @@ void draw_textured_triangle(
     sizeof(projected_vertex_t),
     compare_projected_vertex);
 
+  const projected_vertex_t vert_0 = triangle.vertices[0];
+  const projected_vertex_t vert_1 = triangle.vertices[1];
+  const projected_vertex_t vert_2 = triangle.vertices[2];
+
   float inv_slope_1 = 0.0f;
   float inv_slope_2 = 0.0f;
-  if (triangle.vertices[1].point.y - triangle.vertices[0].point.y != 0) {
-    inv_slope_1 =
-      (float)(triangle.vertices[1].point.x - triangle.vertices[0].point.x)
-      / (float)abs(triangle.vertices[1].point.y - triangle.vertices[0].point.y);
+  if (vert_1.point.y - vert_0.point.y != 0) {
+    inv_slope_1 = (float)(vert_1.point.x - vert_0.point.x)
+                / (float)abs(vert_1.point.y - vert_0.point.y);
   }
-  if (triangle.vertices[2].point.y - triangle.vertices[0].point.y != 0) {
-    inv_slope_2 =
-      (float)(triangle.vertices[2].point.x - triangle.vertices[0].point.x)
-      / (float)abs(triangle.vertices[2].point.y - triangle.vertices[0].point.y);
+  if (vert_2.point.y - vert_0.point.y != 0) {
+    inv_slope_2 = (float)(vert_2.point.x - vert_0.point.x)
+                / (float)abs(vert_2.point.y - vert_0.point.y);
   }
 
-  if (triangle.vertices[1].point.y - triangle.vertices[0].point.y != 0) {
-    for (int y = triangle.vertices[0].point.y;
-         y <= triangle.vertices[1].point.y;
-         y++) {
+  if (vert_1.point.y - vert_0.point.y != 0) {
+    for (int y = vert_0.point.y; y <= vert_1.point.y; y++) {
       int x_start =
-        triangle.vertices[1].point.x
-        + (int)((float)(y - triangle.vertices[1].point.y) * inv_slope_1);
+        vert_1.point.x + (int)((float)(y - vert_1.point.y) * inv_slope_1);
       int x_end =
-        triangle.vertices[0].point.x
-        + (int)((float)(y - triangle.vertices[0].point.y) * inv_slope_2);
+        vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
 
       if (x_end < x_start) {
         swapi(&x_start, &x_end); // swap if x_start is to the right of x_end
@@ -263,15 +263,19 @@ void draw_textured_triangle(
         const point2i_t point = (point2i_t){x, y};
         const barycentric_coords_t barycentric_coords =
           calculate_barycentric_coordinates(
-            triangle.vertices[0].point,
-            triangle.vertices[1].point,
-            triangle.vertices[2].point,
-            point);
-        const tex2f_t uv = calculate_uv(
+            vert_0.point, vert_1.point, vert_2.point, point);
+        tex2f_t uv = calculate_uv(
           barycentric_coords,
-          triangle.vertices[0].uv,
-          triangle.vertices[1].uv,
-          triangle.vertices[2].uv);
+          vert_0.uv,
+          vert_0.w,
+          vert_1.uv,
+          vert_1.w,
+          vert_2.uv,
+          vert_2.w);
+        const float w_recip = (1.0f / vert_0.w) * barycentric_coords.alpha
+                            + (1.0f / vert_1.w) * barycentric_coords.beta
+                            + (1.0f / vert_2.w) * barycentric_coords.gamma;
+        uv = tex2f_div_scalar(uv, w_recip);
         draw_texel(point, uv, texture);
       }
     }
@@ -280,27 +284,21 @@ void draw_textured_triangle(
   inv_slope_1 = 0.0f;
   inv_slope_2 = 0.0f;
 
-  if (triangle.vertices[2].point.y - triangle.vertices[1].point.y != 0) {
-    inv_slope_1 =
-      (float)(triangle.vertices[2].point.x - triangle.vertices[1].point.x)
-      / (float)abs(triangle.vertices[2].point.y - triangle.vertices[1].point.y);
+  if (vert_2.point.y - vert_1.point.y != 0) {
+    inv_slope_1 = (float)(vert_2.point.x - vert_1.point.x)
+                / (float)abs(vert_2.point.y - vert_1.point.y);
   }
-  if (triangle.vertices[2].point.y - triangle.vertices[0].point.y != 0) {
-    inv_slope_2 =
-      (float)(triangle.vertices[2].point.x - triangle.vertices[0].point.x)
-      / (float)abs(triangle.vertices[2].point.y - triangle.vertices[0].point.y);
+  if (vert_2.point.y - vert_0.point.y != 0) {
+    inv_slope_2 = (float)(vert_2.point.x - vert_0.point.x)
+                / (float)abs(vert_2.point.y - vert_0.point.y);
   }
 
-  if (triangle.vertices[2].point.y - triangle.vertices[1].point.y != 0) {
-    for (int y = triangle.vertices[1].point.y;
-         y <= triangle.vertices[2].point.y;
-         y++) {
+  if (vert_2.point.y - vert_1.point.y != 0) {
+    for (int y = vert_1.point.y; y <= vert_2.point.y; y++) {
       int x_start =
-        triangle.vertices[1].point.x
-        + (int)((float)(y - triangle.vertices[1].point.y) * inv_slope_1);
+        vert_1.point.x + (int)((float)(y - vert_1.point.y) * inv_slope_1);
       int x_end =
-        triangle.vertices[0].point.x
-        + (int)((float)(y - triangle.vertices[0].point.y) * inv_slope_2);
+        vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
 
       if (x_end < x_start) {
         swapi(&x_start, &x_end);
@@ -310,15 +308,19 @@ void draw_textured_triangle(
         const point2i_t point = (point2i_t){x, y};
         const barycentric_coords_t barycentric_coords =
           calculate_barycentric_coordinates(
-            triangle.vertices[0].point,
-            triangle.vertices[1].point,
-            triangle.vertices[2].point,
-            point);
-        const tex2f_t uv = calculate_uv(
+            vert_0.point, vert_1.point, vert_2.point, point);
+        tex2f_t uv = calculate_uv(
           barycentric_coords,
-          triangle.vertices[0].uv,
-          triangle.vertices[1].uv,
-          triangle.vertices[2].uv);
+          vert_0.uv,
+          vert_0.w,
+          vert_1.uv,
+          vert_1.w,
+          vert_2.uv,
+          vert_2.w);
+        const float w_recip = (1.0f / vert_0.w) * barycentric_coords.alpha
+                            + (1.0f / vert_1.w) * barycentric_coords.beta
+                            + (1.0f / vert_2.w) * barycentric_coords.gamma;
+        uv = tex2f_div_scalar(uv, w_recip);
         draw_texel(point, uv, texture);
       }
     }

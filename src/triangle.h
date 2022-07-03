@@ -13,6 +13,8 @@ typedef struct face_t {
 
 typedef struct projected_vertex_t {
   point2i_t point;
+  float z;
+  float w;
   tex2f_t uv;
 } projected_vertex_t;
 

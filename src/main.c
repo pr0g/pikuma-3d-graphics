@@ -187,19 +187,20 @@ void update(void) {
         {.uv = g_model.mesh.uvs[mesh_face.uv_indices[1] - 1]},
         {.uv = g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}}};
 
-    point4f_t projected_points[3];
     for (int v = 0; v < 3; ++v) {
-      projected_points[v] = mat44f_project_point3f(
+      const point4f_t projected_point = mat44f_project_point3f(
         g_perspective_projection, transformed_vertices[v]);
 
-      const point2f_t projected_point = mat22f_multiply_point2f(
+      const point2f_t projected_point_2d = mat22f_multiply_point2f(
         mat22f_scale_from_floats(
           (float)window_width() / 2.0f, (float)window_height() / -2.0f),
-        point2f_from_point4f(projected_points[v]));
+        point2f_from_point4f(projected_point));
 
       projected_triangle.vertices[v].point = point2i_add_vec2i(
-        point2i_from_point2f(projected_point),
+        point2i_from_point2f(projected_point_2d),
         (vec2i_t){window_width() / 2, window_height() / 2});
+      projected_triangle.vertices[v].z = projected_point.z;
+      projected_triangle.vertices[v].w = projected_point.w;
     }
 
     array_push(g_triangles_to_render, projected_triangle);

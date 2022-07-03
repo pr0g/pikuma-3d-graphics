@@ -403,6 +403,10 @@ point4f_t point4f_from_point3f(const point3f_t point) {
   return (point4f_t){point.x, point.y, point.z, 1.0f};
 }
 
+point4f_t point4f_from_point2f(const point2f_t point) {
+  return (point4f_t){point.x, point.y, 0.0f, 1.0f};
+}
+
 point2f_t point2f_from_point4f(const point4f_t point) {
   return (point2f_t){point.x, point.y};
 }

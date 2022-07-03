@@ -5,6 +5,10 @@
 #include <math.h>
 #include <stdio.h>
 
+tex2f_t tex2f_div_scalar(tex2f_t tex, float scale) {
+  return (tex2f_t){tex.u / scale, tex.v / scale};
+}
+
 barycentric_coords_t calculate_barycentric_coordinates(
   const point2i_t a, const point2i_t b, const point2i_t c, const point2i_t p) {
   const vec2i_t ab = point2i_sub_point2i(b, a);
@@ -27,13 +31,18 @@ barycentric_coords_t calculate_barycentric_coordinates(
 tex2f_t calculate_uv(
   const barycentric_coords_t barycentric_coords,
   const tex2f_t uv0,
+  const float w0,
   const tex2f_t uv1,
-  const tex2f_t uv2) {
+  const float w1,
+  const tex2f_t uv2,
+  const float w2) {
   return (tex2f_t){
-    .u = uv0.u * barycentric_coords.alpha + uv1.u * barycentric_coords.beta
-       + uv2.u * barycentric_coords.gamma,
-    .v = uv0.v * barycentric_coords.alpha + uv1.v * barycentric_coords.beta
-       + uv2.v * barycentric_coords.gamma};
+    .u = (uv0.u / w0) * barycentric_coords.alpha
+       + (uv1.u / w1) * barycentric_coords.beta
+       + (uv2.u / w2) * barycentric_coords.gamma,
+    .v = (uv0.v / w0) * barycentric_coords.alpha
+       + (uv1.v / w1) * barycentric_coords.beta
+       + (uv2.v / w2) * barycentric_coords.gamma};
 }
 
 point2i_t point2i_at_proportion_of_size2i(
