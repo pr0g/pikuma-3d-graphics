@@ -32,6 +32,7 @@ texture_t g_texture;
 
 void setup(void) {
   create_color_buffer();
+  create_depth_buffer();
   load_obj_mesh_data("assets/cube.obj");
   // load_cube_mesh_data();
   g_perspective_projection = mat44f_perspective_projection(
@@ -261,6 +262,7 @@ void render(void) {
 
   render_color_buffer();
   clear_color_buffer(0xff000000);
+  clear_depth_buffer();
 
   renderer_present();
 }
@@ -269,6 +271,7 @@ void teardown(void) {
   upng_free(g_texture.png_texture);
   array_free(g_model.mesh.faces);
   array_free(g_model.mesh.vertices);
+  destroy_depth_buffer();
   destroy_color_buffer();
   deinitialize_window();
 }

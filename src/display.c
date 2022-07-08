@@ -12,6 +12,7 @@ static struct SDL_Window* s_window = NULL;
 static struct SDL_Renderer* s_renderer = NULL;
 static uint32_t* s_color_buffer = NULL;
 static struct SDL_Texture* s_color_buffer_texture = NULL;
+static float* s_depth_buffer = NULL;
 
 static int s_window_width = 800;
 static int s_window_height = 600;
@@ -257,7 +258,7 @@ void draw_textured_triangle(
         vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
 
       if (x_end < x_start) {
-        swapi(&x_start, &x_end); // swap if x_start is to the right of x_end
+        swapi(&x_start, &x_end);
       }
 
       for (int x = x_start; x <= x_end; x++) {
@@ -277,7 +278,12 @@ void draw_textured_triangle(
                             + (1.0f / vert_1.w) * barycentric_coords.beta
                             + (1.0f / vert_2.w) * barycentric_coords.gamma;
         uv = tex2f_div_scalar(uv, w_recip);
-        draw_texel(point, uv, texture);
+        const int lookup = point.y * s_window_width + point.x;
+        const float inverted_w_recip = 1.0f - w_recip;
+        if (inverted_w_recip < s_depth_buffer[lookup]) {
+          draw_texel(point, uv, texture);
+          s_depth_buffer[lookup] = inverted_w_recip;
+        }
       }
     }
   }
@@ -322,7 +328,12 @@ void draw_textured_triangle(
                             + (1.0f / vert_1.w) * barycentric_coords.beta
                             + (1.0f / vert_2.w) * barycentric_coords.gamma;
         uv = tex2f_div_scalar(uv, w_recip);
-        draw_texel(point, uv, texture);
+        const int lookup = point.y * s_window_width + point.x;
+        const float inverted_w_recip = 1.0f - w_recip;
+        if (inverted_w_recip < s_depth_buffer[lookup]) {
+          draw_texel(point, uv, texture);
+          s_depth_buffer[lookup] = inverted_w_recip;
+        }
       }
     }
   }
@@ -332,6 +343,14 @@ void clear_color_buffer(const uint32_t color) {
   for (int col = 0; col < s_window_width; ++col) {
     for (int row = 0; row < s_window_height; ++row) {
       s_color_buffer[row * s_window_width + col] = color;
+    }
+  }
+}
+
+void clear_depth_buffer(void) {
+  for (int col = 0; col < s_window_width; ++col) {
+    for (int row = 0; row < s_window_height; ++row) {
+      s_depth_buffer[row * s_window_width + col] = 1.0f;
     }
   }
 }
@@ -364,6 +383,14 @@ void create_color_buffer(void) {
 void destroy_color_buffer(void) {
   SDL_DestroyTexture(s_color_buffer_texture);
   free(s_color_buffer);
+}
+
+void create_depth_buffer(void) {
+  s_depth_buffer = malloc(sizeof(float) * s_window_width * s_window_height);
+}
+
+void destroy_depth_buffer(void) {
+  free(s_depth_buffer);
 }
 
 void renderer_clear(void) {

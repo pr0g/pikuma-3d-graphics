@@ -27,6 +27,9 @@ void deinitialize_window(void);
 void create_color_buffer(void);
 void destroy_color_buffer(void);
 
+void create_depth_buffer(void);
+void destroy_depth_buffer(void);
+
 void draw_pixel(struct point2i_t point, uint32_t color);
 void draw_texel(
   struct point2i_t point, struct tex2f_t uv, struct texture_t texture);
@@ -39,7 +42,8 @@ void draw_textured_triangle(
   struct projected_triangle_t triangle, struct texture_t texture);
 
 void render_color_buffer(void);
-void clear_color_buffer(const uint32_t color);
+void clear_color_buffer(uint32_t color);
+void clear_depth_buffer(void);
 
 void renderer_clear(void);
 void renderer_present(void);
