@@ -150,48 +150,52 @@ static int compare_projected_vertex(const void* lhs, const void* rhs) {
   return 0;
 }
 
-static void fill_triangle(
-  const point2i_t start,
-  const point2i_t left,
-  const point2i_t right,
-  const float direction,
+static void draw_part_filled_triangle(
+  const projected_vertex_t vert_0,
+  const projected_vertex_t vert_1,
+  const projected_vertex_t vert_2,
+  const point2i_t part_begin,
+  const point2i_t part_end,
   const uint32_t color) {
-  const float inv_slope1 =
-    ((float)(left.x - start.x) / (float)(left.y - start.y)) * direction;
-  const float inv_slope2 =
-    ((float)(right.x - start.x) / (float)(right.y - start.y)) * direction;
-  float x_start = (float)start.x;
-  float x_end = (float)start.x;
-  const int delta = abs(left.y - start.y);
-  for (int y = 0; y <= delta; y++) {
-    const float current_y = (float)start.y + (float)y * direction;
-    draw_line(
-      point2i_from_point2f((point2f_t){x_start, current_y}),
-      point2i_from_point2f((point2f_t){x_end, current_y}),
-      color);
-    x_start += inv_slope1;
-    x_end += inv_slope2;
+  const vec2i_t delta = point2i_sub_point2i(part_end, part_begin);
+  float inv_slope_1 = 0.0f;
+  float inv_slope_2 = 0.0f;
+  if (delta.y != 0) {
+    inv_slope_1 = (float)(delta.x) / (float)abs(delta.y);
   }
-}
+  if (vert_2.point.y - vert_0.point.y != 0) {
+    inv_slope_2 = (float)(vert_2.point.x - vert_0.point.x)
+                / (float)abs(vert_2.point.y - vert_0.point.y);
+  }
 
-static void fill_flat_bottom_triangle(
-  const projected_triangle_t triangle, const uint32_t color) {
-  fill_triangle(
-    triangle.vertices[0].point,
-    triangle.vertices[1].point,
-    triangle.vertices[2].point,
-    1.0f,
-    color);
-}
+  if (delta.y != 0) {
+    for (int y = part_begin.y; y <= part_end.y; y++) {
+      int x_start =
+        vert_1.point.x + (int)((float)(y - vert_1.point.y) * inv_slope_1);
+      int x_end =
+        vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
 
-static void fill_flat_top_triangle(
-  const projected_triangle_t triangle, const uint32_t color) {
-  fill_triangle(
-    triangle.vertices[2].point,
-    triangle.vertices[0].point,
-    triangle.vertices[1].point,
-    -1.0f,
-    color);
+      if (x_end < x_start) {
+        swapi(&x_start, &x_end);
+      }
+
+      for (int x = x_start; x <= x_end; x++) {
+        const point2i_t point = (point2i_t){x, y};
+        const barycentric_coords_t barycentric_coords =
+          calculate_barycentric_coordinates(
+            vert_0.point, vert_1.point, vert_2.point, point);
+        const float w_recip = (1.0f / vert_0.w) * barycentric_coords.alpha
+                            + (1.0f / vert_1.w) * barycentric_coords.beta
+                            + (1.0f / vert_2.w) * barycentric_coords.gamma;
+        const int lookup = point.y * s_window_width + point.x;
+        const float inverted_w_recip = 1.0f - w_recip;
+        if (inverted_w_recip < s_depth_buffer[lookup]) {
+          draw_pixel(point, color);
+          s_depth_buffer[lookup] = inverted_w_recip;
+        }
+      }
+    }
+  }
 }
 
 void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
@@ -200,31 +204,18 @@ void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
     sizeof triangle.vertices / sizeof *triangle.vertices,
     sizeof(projected_vertex_t),
     compare_projected_vertex);
-  if (triangle.vertices[1].point.y == triangle.vertices[2].point.y) {
-    fill_flat_bottom_triangle(triangle, color);
-  } else if (triangle.vertices[0].point.y == triangle.vertices[1].point.y) {
-    fill_flat_top_triangle(triangle, color);
-  } else {
-    const int mid_y = triangle.vertices[1].point.y;
-    const int mid_x = (int)((float)((triangle.vertices[2].point.x - triangle.vertices[0].point.x)
-                   * (triangle.vertices[1].point.y - triangle.vertices[0].point.y))
-                  / (float)(triangle.vertices[2].point.y - triangle.vertices[0].point.y))
-               + triangle.vertices[0].point.x;
-    fill_flat_bottom_triangle(
-      (projected_triangle_t){
-        .vertices =
-          {{.point = triangle.vertices[0].point},
-           {.point = triangle.vertices[1].point},
-           {.point = (point2i_t){.x = mid_x, .y = mid_y}}}},
-      color);
-    fill_flat_top_triangle(
-      (projected_triangle_t){
-        .vertices =
-          {{.point = triangle.vertices[1].point},
-           {.point = (point2i_t){.x = mid_x, .y = mid_y}},
-           {.point = triangle.vertices[2].point}}},
-      color);
-  }
+
+  // sorted vertices (in y axis)
+  const projected_vertex_t vert_0 = triangle.vertices[0];
+  const projected_vertex_t vert_1 = triangle.vertices[1];
+  const projected_vertex_t vert_2 = triangle.vertices[2];
+
+  // top
+  draw_part_filled_triangle(
+    vert_0, vert_1, vert_2, vert_0.point, vert_1.point, color);
+  // bottom
+  draw_part_filled_triangle(
+    vert_0, vert_1, vert_2, vert_1.point, vert_2.point, color);
 }
 
 static void draw_part_textured_triangle(

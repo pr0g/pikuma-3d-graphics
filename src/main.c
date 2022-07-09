@@ -113,19 +113,6 @@ void calculate_framerate(void) {
   }
 }
 
-// sort largest to smallest
-static int compare_projected_triangle(const void* lhs, const void* rhs) {
-  const projected_triangle_t* arg1 = (const projected_triangle_t*)(lhs);
-  const projected_triangle_t* arg2 = (const projected_triangle_t*)(rhs);
-  if (arg1->average_depth < arg2->average_depth) {
-    return 1;
-  }
-  if (arg1->average_depth > arg2->average_depth) {
-    return -1;
-  }
-  return 0;
-}
-
 void update(void) {
   wait_to_update();
   calculate_framerate();
@@ -181,9 +168,6 @@ void update(void) {
     }
 
     projected_triangle_t projected_triangle = {
-      .average_depth = (transformed_vertices[0].z + transformed_vertices[1].z
-                        + transformed_vertices[2].z)
-                     / 3,
       .color = apply_light_intensity(
         0xffffff, -vec3f_dot_vec3f(normal, g_light_direction)),
       .vertices = {
@@ -209,12 +193,6 @@ void update(void) {
 
     array_push(g_triangles_to_render, projected_triangle);
   }
-
-  qsort(
-    g_triangles_to_render,
-    array_length(g_triangles_to_render),
-    sizeof(projected_triangle_t),
-    compare_projected_triangle);
 }
 
 void render(void) {

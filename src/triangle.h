@@ -20,7 +20,6 @@ typedef struct projected_vertex_t {
 
 typedef struct projected_triangle_t {
   projected_vertex_t vertices[3];
-  float average_depth;
   uint32_t color;
 } projected_triangle_t;
 
