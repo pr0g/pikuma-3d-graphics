@@ -29,6 +29,7 @@ bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
 const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
 texture_t g_texture;
+int g_projected_count = 0; // triangles projected on a given frame
 
 void setup(void) {
   create_color_buffer();
@@ -136,9 +137,11 @@ void update(void) {
   const mat34f_t model_transform = mat34f_multiply_mat33f(
     mat34f_multiply_mat33f(translation, rotation), scale);
 
-  for (int i = 0, face_count = array_length(g_model.mesh.faces); i < face_count;
-       ++i) {
-    const face_t mesh_face = g_model.mesh.faces[i];
+  g_projected_count = 0;
+  for (int face_index = 0, face_count = array_length(g_model.mesh.faces);
+       face_index < face_count;
+       ++face_index) {
+    const face_t mesh_face = g_model.mesh.faces[face_index];
     const point3f_t face_vertices[] = {
       g_model.mesh.vertices[mesh_face.vert_indices[0] - 1],
       g_model.mesh.vertices[mesh_face.vert_indices[1] - 1],
@@ -167,6 +170,8 @@ void update(void) {
       }
     }
 
+    g_projected_count++;
+
     projected_triangle_t projected_triangle = {
       .color = apply_light_intensity(
         0xffffff, -vec3f_dot_vec3f(normal, g_light_direction)),
@@ -191,16 +196,18 @@ void update(void) {
       projected_triangle.vertices[v].w = projected_point.w;
     }
 
-    array_push(g_triangles_to_render, projected_triangle);
+    if (array_length(g_triangles_to_render) < g_projected_count) {
+      array_push(g_triangles_to_render, projected_triangle);
+    } else {
+      g_triangles_to_render[g_projected_count - 1] = projected_triangle;
+    }
   }
 }
 
 void render(void) {
   renderer_clear();
 
-  for (int i = 0, triangle_count = array_length(g_triangles_to_render);
-       i < triangle_count;
-       ++i) {
+  for (int i = 0, triangle_count = g_projected_count; i < triangle_count; ++i) {
     switch (g_display_mode) {
       case display_mode_filled:
         draw_filled_triangle(
@@ -235,9 +242,6 @@ void render(void) {
     }
   }
 
-  array_free(g_triangles_to_render);
-  g_triangles_to_render = NULL;
-
   render_color_buffer();
   clear_color_buffer(0xff000000);
   clear_depth_buffer();
@@ -246,6 +250,8 @@ void render(void) {
 }
 
 void teardown(void) {
+  array_free(g_triangles_to_render);
+  g_triangles_to_render = NULL;
   upng_free(g_texture.png_texture);
   array_free(g_model.mesh.faces);
   array_free(g_model.mesh.vertices);
