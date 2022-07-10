@@ -150,13 +150,23 @@ static int compare_projected_vertex(const void* lhs, const void* rhs) {
   return 0;
 }
 
-static void draw_part_filled_triangle(
+typedef void (*draw_fn_t)(
+  point2i_t point,
+  projected_vertex_t vert_0,
+  projected_vertex_t vert_1,
+  projected_vertex_t vert_2,
+  barycentric_coords_t barycentric_coords,
+  float w_recip,
+  const void* const user_data);
+
+static void draw_part_triangle_interpolated(
   const projected_vertex_t vert_0,
   const projected_vertex_t vert_1,
   const projected_vertex_t vert_2,
   const point2i_t part_begin,
   const point2i_t part_end,
-  const uint32_t color) {
+  draw_fn_t draw_fn,
+  const void* const user_data) {
   const vec2i_t delta = point2i_sub_point2i(part_end, part_begin);
   float inv_slope_1 = 0.0f;
   float inv_slope_2 = 0.0f;
@@ -190,7 +200,14 @@ static void draw_part_filled_triangle(
         const int lookup = point.y * s_window_width + point.x;
         const float inverted_w_recip = 1.0f - w_recip;
         if (inverted_w_recip < s_depth_buffer[lookup]) {
-          draw_pixel(point, color);
+          draw_fn(
+            point,
+            vert_0,
+            vert_1,
+            vert_2,
+            barycentric_coords,
+            w_recip,
+            user_data);
           s_depth_buffer[lookup] = inverted_w_recip;
         }
       }
@@ -198,103 +215,111 @@ static void draw_part_filled_triangle(
   }
 }
 
+typedef struct filled_triangle_user_data_t {
+  uint32_t color;
+} filled_triangle_user_data_t;
+
+static void draw_interpolated_pixel(
+  point2i_t point,
+  projected_vertex_t vert_0,
+  projected_vertex_t vert_1,
+  projected_vertex_t vert_2,
+  barycentric_coords_t barycentric_coords,
+  float w_recip,
+  const void* const user_data) {
+  const filled_triangle_user_data_t* filled_triangle_user_data =
+    (const filled_triangle_user_data_t*)user_data;
+  draw_pixel(point, filled_triangle_user_data->color);
+}
+
 void draw_filled_triangle(projected_triangle_t triangle, const uint32_t color) {
+  // sort vertices (in y axis)
   qsort(
     triangle.vertices,
     sizeof triangle.vertices / sizeof *triangle.vertices,
     sizeof(projected_vertex_t),
     compare_projected_vertex);
 
-  // sorted vertices (in y axis)
-  const projected_vertex_t vert_0 = triangle.vertices[0];
-  const projected_vertex_t vert_1 = triangle.vertices[1];
-  const projected_vertex_t vert_2 = triangle.vertices[2];
+  filled_triangle_user_data_t filled_triangle_user_data;
+  filled_triangle_user_data.color = color;
 
   // top
-  draw_part_filled_triangle(
-    vert_0, vert_1, vert_2, vert_0.point, vert_1.point, color);
+  draw_part_triangle_interpolated(
+    triangle.vertices[0],
+    triangle.vertices[1],
+    triangle.vertices[2],
+    triangle.vertices[0].point,
+    triangle.vertices[1].point,
+    &draw_interpolated_pixel,
+    &filled_triangle_user_data);
   // bottom
-  draw_part_filled_triangle(
-    vert_0, vert_1, vert_2, vert_1.point, vert_2.point, color);
+  draw_part_triangle_interpolated(
+    triangle.vertices[0],
+    triangle.vertices[1],
+    triangle.vertices[2],
+    triangle.vertices[1].point,
+    triangle.vertices[2].point,
+    &draw_interpolated_pixel,
+    &filled_triangle_user_data);
 }
 
-static void draw_part_textured_triangle(
-  const projected_vertex_t vert_0,
-  const projected_vertex_t vert_1,
-  const projected_vertex_t vert_2,
-  const point2i_t part_begin,
-  const point2i_t part_end,
-  const texture_t texture) {
-  const vec2i_t delta = point2i_sub_point2i(part_end, part_begin);
-  float inv_slope_1 = 0.0f;
-  float inv_slope_2 = 0.0f;
-  if (delta.y != 0) {
-    inv_slope_1 = (float)(delta.x) / (float)abs(delta.y);
-  }
-  if (vert_2.point.y - vert_0.point.y != 0) {
-    inv_slope_2 = (float)(vert_2.point.x - vert_0.point.x)
-                / (float)abs(vert_2.point.y - vert_0.point.y);
-  }
+typedef struct textured_triangle_user_data_t {
+  texture_t texture;
+} textured_triangle_user_data_t;
 
-  if (delta.y != 0) {
-    for (int y = part_begin.y; y <= part_end.y; y++) {
-      int x_start =
-        vert_1.point.x + (int)((float)(y - vert_1.point.y) * inv_slope_1);
-      int x_end =
-        vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
-
-      if (x_end < x_start) {
-        swapi(&x_start, &x_end);
-      }
-
-      for (int x = x_start; x <= x_end; x++) {
-        const point2i_t point = (point2i_t){x, y};
-        const barycentric_coords_t barycentric_coords =
-          calculate_barycentric_coordinates(
-            vert_0.point, vert_1.point, vert_2.point, point);
-        const float w_recip = (1.0f / vert_0.w) * barycentric_coords.alpha
-                            + (1.0f / vert_1.w) * barycentric_coords.beta
-                            + (1.0f / vert_2.w) * barycentric_coords.gamma;
-        const int lookup = point.y * s_window_width + point.x;
-        const float inverted_w_recip = 1.0f - w_recip;
-        if (inverted_w_recip < s_depth_buffer[lookup]) {
-          const tex2f_t uv = tex2f_div_scalar(
-            calculate_uv(
-              barycentric_coords,
-              vert_0.uv,
-              vert_0.w,
-              vert_1.uv,
-              vert_1.w,
-              vert_2.uv,
-              vert_2.w),
-            w_recip);
-          draw_texel(point, uv, texture);
-          s_depth_buffer[lookup] = inverted_w_recip;
-        }
-      }
-    }
-  }
+static void draw_interpolated_texel(
+  point2i_t point,
+  projected_vertex_t vert_0,
+  projected_vertex_t vert_1,
+  projected_vertex_t vert_2,
+  barycentric_coords_t barycentric_coords,
+  float w_recip,
+  const void* const user_data) {
+  const textured_triangle_user_data_t* textured_triangle_user_data =
+    (const textured_triangle_user_data_t*)user_data;
+  const tex2f_t uv = tex2f_div_scalar(
+    calculate_uv(
+      barycentric_coords,
+      vert_0.uv,
+      vert_0.w,
+      vert_1.uv,
+      vert_1.w,
+      vert_2.uv,
+      vert_2.w),
+    w_recip);
+  draw_texel(point, uv, textured_triangle_user_data->texture);
 }
 
 void draw_textured_triangle(
   projected_triangle_t triangle, const texture_t texture) {
+  // sort vertices (in y axis)
   qsort(
     triangle.vertices,
     sizeof triangle.vertices / sizeof *triangle.vertices,
     sizeof(projected_vertex_t),
     compare_projected_vertex);
 
-  // sorted vertices (in y axis)
-  const projected_vertex_t vert_0 = triangle.vertices[0];
-  const projected_vertex_t vert_1 = triangle.vertices[1];
-  const projected_vertex_t vert_2 = triangle.vertices[2];
+  textured_triangle_user_data_t textured_triangle_user_data;
+  textured_triangle_user_data.texture = texture;
 
   // top
-  draw_part_textured_triangle(
-    vert_0, vert_1, vert_2, vert_0.point, vert_1.point, texture);
+  draw_part_triangle_interpolated(
+    triangle.vertices[0],
+    triangle.vertices[1],
+    triangle.vertices[2],
+    triangle.vertices[0].point,
+    triangle.vertices[1].point,
+    &draw_interpolated_texel,
+    &textured_triangle_user_data);
   // bottom
-  draw_part_textured_triangle(
-    vert_0, vert_1, vert_2, vert_1.point, vert_2.point, texture);
+  draw_part_triangle_interpolated(
+    triangle.vertices[0],
+    triangle.vertices[1],
+    triangle.vertices[2],
+    triangle.vertices[1].point,
+    triangle.vertices[2].point,
+    &draw_interpolated_texel,
+    &textured_triangle_user_data);
 }
 
 void clear_color_buffer(const uint32_t color) {
