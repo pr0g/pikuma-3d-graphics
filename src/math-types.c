@@ -468,6 +468,18 @@ point2f_t point2f_add_vec2f(const point2f_t point, const vec2f_t vec) {
   return (point2f_t){point.x + vec.x, point.y + vec.y};
 }
 
+vec2f_t point2f_sub_point2f(const point2f_t lhs, const point2f_t rhs) {
+  return (vec2f_t){lhs.x - rhs.x, lhs.y - rhs.y};
+}
+
+float point2f_distance_point2f(point2f_t lhs, point2f_t rhs) {
+  return vec2f_length(point2f_sub_point2f(lhs, rhs));
+}
+
+float point2i_distance_point2i(point2i_t lhs, point2i_t rhs) {
+  return vec2i_length(point2i_sub_point2i(lhs, rhs));
+}
+
 point3f_t point3f_add_vec3f(const point3f_t point, const vec3f_t vec) {
   return (point3f_t){
     .x = point.x + vec.x, .y = point.y + vec.y, .z = point.z + vec.z};
@@ -542,7 +554,7 @@ vec2f_t vec2f_add_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
   return (vec2f_t){.x = lhs.x + rhs.x, .y = lhs.y + rhs.y};
 }
 
-vec2f_t vec2f_sub_vec3f(const vec2f_t lhs, const vec2f_t rhs) {
+vec2f_t vec2f_sub_vec2f(const vec2f_t lhs, const vec2f_t rhs) {
   return (vec2f_t){.x = lhs.x - rhs.x, .y = lhs.y - rhs.y};
 }
 
