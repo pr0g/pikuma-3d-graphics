@@ -87,8 +87,8 @@ void draw_texel(
     clampf(wrapped_uv.u, 0.0f, 1.0f), clampf(wrapped_uv.v, 0.0f, 1.0f)};
   point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
     (size2i_t){.width = texture.width, .height = texture.height}, clamped_uv);
-  texture_coordinate.x = clampf(texture_coordinate.x, 0, texture.width - 1);
-  texture_coordinate.y = clampf(texture_coordinate.y, 0, texture.height - 1);
+  texture_coordinate.x = clampi(texture_coordinate.x, 0, texture.width - 1);
+  texture_coordinate.y = clampi(texture_coordinate.y, 0, texture.height - 1);
   draw_pixel(
     point,
     texture.color_buffer
