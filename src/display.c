@@ -252,21 +252,22 @@ static void draw_part_textured_triangle(
         const barycentric_coords_t barycentric_coords =
           calculate_barycentric_coordinates(
             vert_0.point, vert_1.point, vert_2.point, point);
-        tex2f_t uv = calculate_uv(
-          barycentric_coords,
-          vert_0.uv,
-          vert_0.w,
-          vert_1.uv,
-          vert_1.w,
-          vert_2.uv,
-          vert_2.w);
         const float w_recip = (1.0f / vert_0.w) * barycentric_coords.alpha
                             + (1.0f / vert_1.w) * barycentric_coords.beta
                             + (1.0f / vert_2.w) * barycentric_coords.gamma;
-        uv = tex2f_div_scalar(uv, w_recip);
         const int lookup = point.y * s_window_width + point.x;
         const float inverted_w_recip = 1.0f - w_recip;
         if (inverted_w_recip < s_depth_buffer[lookup]) {
+          const tex2f_t uv = tex2f_div_scalar(
+            calculate_uv(
+              barycentric_coords,
+              vert_0.uv,
+              vert_0.w,
+              vert_1.uv,
+              vert_1.w,
+              vert_2.uv,
+              vert_2.w),
+            w_recip);
           draw_texel(point, uv, texture);
           s_depth_buffer[lookup] = inverted_w_recip;
         }
