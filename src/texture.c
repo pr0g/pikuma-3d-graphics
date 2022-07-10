@@ -9,6 +9,14 @@ tex2f_t tex2f_div_scalar(tex2f_t tex, float scale) {
   return (tex2f_t){tex.u / scale, tex.v / scale};
 }
 
+vec3f_t vec3f_from_barycentric_coords(
+  const barycentric_coords_t barycentric_coords) {
+  return (vec3f_t){
+    barycentric_coords.alpha,
+    barycentric_coords.beta,
+    barycentric_coords.gamma};
+}
+
 barycentric_coords_t calculate_barycentric_coordinates(
   const point2i_t a, const point2i_t b, const point2i_t c, const point2i_t p) {
   const vec2i_t ab = point2i_sub_point2i(b, a);

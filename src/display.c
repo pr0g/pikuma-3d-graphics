@@ -194,9 +194,9 @@ static void draw_part_triangle_interpolated(
         const barycentric_coords_t barycentric_coords =
           calculate_barycentric_coordinates(
             vert_0.point, vert_1.point, vert_2.point, point);
-        const float w_recip = (1.0f / vert_0.w) * barycentric_coords.alpha
-                            + (1.0f / vert_1.w) * barycentric_coords.beta
-                            + (1.0f / vert_2.w) * barycentric_coords.gamma;
+        const float w_recip = vec3f_dot_vec3f(
+          (vec3f_t){1.0f / vert_0.w, 1.0f / vert_1.w, 1.0f / vert_2.w},
+          vec3f_from_barycentric_coords(barycentric_coords));
         const int lookup = point.y * s_window_width + point.x;
         const float inverted_w_recip = 1.0f - w_recip;
         if (inverted_w_recip < s_depth_buffer[lookup]) {

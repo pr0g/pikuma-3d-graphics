@@ -19,6 +19,8 @@ typedef struct barycentric_coords_t {
   float gamma;
 } barycentric_coords_t;
 
+vec3f_t vec3f_from_barycentric_coords(barycentric_coords_t barycentric_coords);
+
 typedef struct texture_t {
   upng_t* png_texture;
   uint32_t* color_buffer;
