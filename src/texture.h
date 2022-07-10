@@ -19,8 +19,6 @@ typedef struct barycentric_coords_t {
   float gamma;
 } barycentric_coords_t;
 
-vec3f_t vec3f_from_barycentric_coords(barycentric_coords_t barycentric_coords);
-
 typedef struct texture_t {
   upng_t* png_texture;
   uint32_t* color_buffer;
@@ -28,7 +26,9 @@ typedef struct texture_t {
   int height;
 } texture_t;
 
+vec3f_t vec3f_from_barycentric_coords(barycentric_coords_t barycentric_coords);
 tex2f_t tex2f_div_scalar(tex2f_t tex, float scale);
+point2i_t point2i_at_proportion_of_size2i(size2i_t size, tex2f_t uv);
 
 barycentric_coords_t calculate_barycentric_coordinates(
   point2i_t a, point2i_t b, point2i_t c, point2i_t p);
@@ -41,8 +41,6 @@ tex2f_t calculate_uv(
   float w1,
   tex2f_t uv2,
   float w2);
-
-point2i_t point2i_at_proportion_of_size2i(size2i_t size, tex2f_t uv);
 
 texture_t load_png_texture_data(const char* filename);
 
