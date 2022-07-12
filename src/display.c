@@ -18,11 +18,7 @@ static int s_window_width = 800;
 static int s_window_height = 600;
 
 int32_t fps(void) {
-  return 30;
-}
-
-int32_t frame_target_time(void) {
-  return 1000 / fps();
+  return 60;
 }
 
 float seconds_per_frame(void) {
@@ -31,7 +27,7 @@ float seconds_per_frame(void) {
 
 double seconds_elapsed(
   const uint64_t old_counter, const uint64_t current_counter) {
-  return (current_counter - old_counter)
+  return (double)(current_counter - old_counter)
        / (double)SDL_GetPerformanceFrequency();
 }
 

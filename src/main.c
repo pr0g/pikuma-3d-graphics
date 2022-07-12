@@ -138,7 +138,6 @@ void wait_to_update(void) {
       ;
     }
   }
-  g_previous_frame_time = SDL_GetPerformanceCounter();
 }
 
 void calculate_framerate(void) {
@@ -153,11 +152,15 @@ void calculate_framerate(void) {
 }
 
 void update(void) {
+  const double delta_time =
+    seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
+  g_previous_frame_time = SDL_GetPerformanceCounter();
+
   wait_to_update();
   calculate_framerate();
 
   g_model.rotation =
-    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.0f, 0.0f, 0.0f});
+    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.0f, delta_time * 0.5f, 0.0f});
   // vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
   // g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
   // g_model.translation =
@@ -303,6 +306,7 @@ int main(int argc, char** argv) {
 
   setup();
 
+  g_previous_frame_time = SDL_GetPerformanceCounter();
   while (is_running) {
     is_running = process_input();
     update();

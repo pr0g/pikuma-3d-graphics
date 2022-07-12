@@ -17,7 +17,6 @@ struct tex2f_t;
 struct texture_t;
 
 int32_t fps(void);
-int32_t frame_target_time(void);
 float seconds_per_frame(void);
 double seconds_elapsed(uint64_t old_counter, uint64_t current_counter);
 
