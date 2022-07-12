@@ -1,6 +1,7 @@
 #include <SDL.h>
 
 #include "array.h"
+#include "camera.h"
 #include "display.h"
 #include "fps.h"
 #include "lighting.h"
@@ -21,7 +22,7 @@ typedef enum display_mode_e {
 } display_mode_e;
 
 projected_triangle_t* g_triangles_to_render = NULL;
-const point3f_t g_camera_position = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
+camera_t g_camera = {};
 uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_textured;
@@ -42,6 +43,9 @@ void setup(void) {
     0.1f,
     100.0f);
   g_texture = load_png_texture_data("assets/redbrick.png");
+
+  g_camera.pivot = (point3f_t){.x = 0.0f, .y = 0.0f, .z = 5.0f};
+  g_camera.offset = (vec3f_t){.z = -5.0f};
 }
 
 bool process_input(void) {
@@ -68,6 +72,40 @@ bool process_input(void) {
         g_display_mode = display_mode_textured_wireframe;
       } else if (event.key.keysym.sym == SDLK_c) {
         g_backface_culling = !g_backface_culling;
+      } else if (event.key.keysym.sym == SDLK_LEFT) {
+        g_camera.yaw -= 0.01f;
+      } else if (event.key.keysym.sym == SDLK_RIGHT) {
+        g_camera.yaw += 0.01f;
+      } else if (event.key.keysym.sym == SDLK_UP) {
+        g_camera.pitch -= 0.01f;
+      } else if (event.key.keysym.sym == SDLK_DOWN) {
+        g_camera.pitch += 0.01f;
+      } else if (event.key.keysym.sym == SDLK_w) {
+        const mat33f_t rotation = camera_rotation(g_camera);
+        g_camera.pivot = point3f_add_vec3f(
+          g_camera.pivot,
+          mat33f_multiply_vec3f(rotation, (vec3f_t){0.0f, 0.0f, 0.1f}));
+      } else if (event.key.keysym.sym == SDLK_a) {
+        const mat33f_t rotation = camera_rotation(g_camera);
+        g_camera.pivot = point3f_add_vec3f(
+          g_camera.pivot,
+          mat33f_multiply_vec3f(rotation, (vec3f_t){-0.1f, 0.0f, 0.0f}));
+      } else if (event.key.keysym.sym == SDLK_s) {
+        const mat33f_t rotation = camera_rotation(g_camera);
+        g_camera.pivot = point3f_add_vec3f(
+          g_camera.pivot,
+          mat33f_multiply_vec3f(rotation, (vec3f_t){0.0f, 0.0f, -0.1f}));
+      } else if (event.key.keysym.sym == SDLK_d) {
+        const mat33f_t rotation = camera_rotation(g_camera);
+        g_camera.pivot = point3f_add_vec3f(
+          g_camera.pivot,
+          mat33f_multiply_vec3f(rotation, (vec3f_t){0.1f, 0.0f, 0.0f}));
+      } else if (event.key.keysym.sym == SDLK_q) {
+        g_camera.pivot =
+          point3f_add_vec3f(g_camera.pivot, (vec3f_t){0.0f, -0.1f, 0.0f});
+      } else if (event.key.keysym.sym == SDLK_e) {
+        g_camera.pivot =
+          point3f_add_vec3f(g_camera.pivot, (vec3f_t){0.0f, 0.1f, 0.0f});
       }
     default:
       break;
@@ -119,7 +157,7 @@ void update(void) {
   calculate_framerate();
 
   g_model.rotation =
-    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.01f, 0.01f, 0.01f});
+    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.0f, 0.0f, 0.0f});
   // vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
   // g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
   // g_model.translation =
@@ -149,8 +187,9 @@ void update(void) {
 
     point3f_t transformed_vertices[3];
     for (int v = 0; v < 3; ++v) {
-      transformed_vertices[v] =
-        mat34f_multiply_point3f(model_transform, face_vertices[v]);
+      const mat34f_t cam = camera_view(g_camera);
+      transformed_vertices[v] = mat34f_multiply_point3f(
+        cam, mat34f_multiply_point3f(model_transform, face_vertices[v]));
     }
 
     const point3f_t a = transformed_vertices[0];
@@ -162,8 +201,7 @@ void update(void) {
       vec3f_normalized(vec3f_cross_vec3f(edge_ab, edge_ac));
 
     if (g_backface_culling) {
-      const vec3f_t camera_direction =
-        point3f_sub_point3f(g_camera_position, a);
+      const vec3f_t camera_direction = point3f_sub_point3f((point3f_t){}, a);
       const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
       if (view_dot < 0.0f) {
         continue;

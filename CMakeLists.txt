@@ -23,6 +23,7 @@ target_sources(
           src/array.c
           src/lighting.c
           src/texture.c
+          src/camera.c
           third-party/upng/upng.c)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 target_compile_options(

@@ -84,6 +84,36 @@ mat33f_t mat33f_scale_from_vec3f(const vec3f_t scale_xyz) {
   return mat33f_scale_from_floats(scale_xyz.x, scale_xyz.y, scale_xyz.z);
 }
 
+mat33f_t mat33f_from_mat34f(const mat34f_t mat) {
+  return (mat33f_t){
+    .elem = {
+      [0] = mat.elem[0],
+      [1] = mat.elem[1],
+      [2] = mat.elem[2],
+      [3] = mat.elem[4],
+      [4] = mat.elem[5],
+      [5] = mat.elem[6],
+      [6] = mat.elem[8],
+      [7] = mat.elem[9],
+      [8] = mat.elem[10],
+    }};
+}
+
+mat33f_t mat33f_transpose(const mat33f_t mat) {
+  return (mat33f_t){
+    .elem = {
+      [0] = mat.elem[0],
+      [1] = mat.elem[3],
+      [2] = mat.elem[6],
+      [3] = mat.elem[1],
+      [4] = mat.elem[4],
+      [5] = mat.elem[7],
+      [6] = mat.elem[2],
+      [7] = mat.elem[5],
+      [8] = mat.elem[8],
+    }};
+}
+
 mat33f_t mat33f_x_rotation_from_float(const float rotation_radians) {
   const float cos_rotation = cosf(rotation_radians);
   const float sin_rotation = sinf(rotation_radians);
@@ -139,6 +169,28 @@ mat34f_t mat34f_translation_from_vec3f(const vec3f_t translation) {
     translation.x, translation.y, translation.z);
 }
 
+mat34f_t mat34f_translation_from_point3f(const point3f_t position) {
+  return mat34f_translation_from_floats(position.x, position.y, position.z);
+}
+
+mat34f_t mat34f_from_mat33f_and_vec3f(
+  const mat33f_t rotation, const vec3f_t translation) {
+  return (mat34f_t){
+    .elem = {
+      [0] = rotation.elem[0],
+      [1] = rotation.elem[1],
+      [2] = rotation.elem[2],
+      [4] = rotation.elem[3],
+      [5] = rotation.elem[4],
+      [6] = rotation.elem[5],
+      [8] = rotation.elem[6],
+      [9] = rotation.elem[7],
+      [10] = rotation.elem[8],
+      [3] = translation.x,
+      [7] = translation.y,
+      [11] = translation.z}};
+}
+
 point2f_t mat22f_multiply_point2f(const mat22f_t mat, const point2f_t point) {
   return (point2f_t){
     .x = mat.elem[0] * point.x + mat.elem[1] * point.y,
@@ -146,10 +198,8 @@ point2f_t mat22f_multiply_point2f(const mat22f_t mat, const point2f_t point) {
 }
 
 point3f_t mat33f_multiply_point3f(const mat33f_t mat, const point3f_t point) {
-  return (point3f_t){
-    .x = mat.elem[0] * point.x + mat.elem[1] * point.y + mat.elem[2] * point.z,
-    .y = mat.elem[3] * point.x + mat.elem[4] * point.y + mat.elem[5] * point.z,
-    .z = mat.elem[6] * point.x + mat.elem[7] * point.y + mat.elem[8] * point.z};
+  return point3f_from_vec3f(
+    mat33f_multiply_vec3f(mat, vec3f_from_point3f(point)));
 }
 
 point3f_t mat34f_multiply_point3f(const mat34f_t mat, const point3f_t point) {
@@ -160,6 +210,13 @@ point3f_t mat34f_multiply_point3f(const mat34f_t mat, const point3f_t point) {
        + mat.elem[7],
     .z = mat.elem[8] * point.x + mat.elem[9] * point.y + mat.elem[10] * point.z
        + mat.elem[11]};
+}
+
+vec3f_t mat33f_multiply_vec3f(const mat33f_t mat, const vec3f_t vec) {
+  return (vec3f_t){
+    .x = mat.elem[0] * vec.x + mat.elem[1] * vec.y + mat.elem[2] * vec.z,
+    .y = mat.elem[3] * vec.x + mat.elem[4] * vec.y + mat.elem[5] * vec.z,
+    .z = mat.elem[6] * vec.x + mat.elem[7] * vec.y + mat.elem[8] * vec.z};
 }
 
 mat33f_t mat33f_multiply_mat33f(const mat33f_t lhs, const mat33f_t rhs) {
@@ -304,6 +361,15 @@ mat44f_t mat44f_multiply_mat44f(const mat44f_t lhs, const mat44f_t rhs) {
            + lhs.elem[14] * rhs.elem[10] + lhs.elem[15] * rhs.elem[14],
       [15] = lhs.elem[12] * rhs.elem[3] + lhs.elem[13] * rhs.elem[7]
            + lhs.elem[14] * rhs.elem[11] + lhs.elem[15] * rhs.elem[15]}};
+}
+
+mat34f_t mat34f_inverse(const mat34f_t mat) {
+  const mat33f_t inverse_rotation = mat33f_transpose(mat33f_from_mat34f(mat));
+  const point3f_t inverse_translation = mat33f_multiply_point3f(
+    inverse_rotation,
+    (point3f_t){.x = -mat.elem[3], .y = -mat.elem[7], .z = -mat.elem[11]});
+  return mat34f_from_mat33f_and_vec3f(
+    inverse_rotation, vec3f_from_point3f(inverse_translation));
 }
 
 mat44f_t mat44f_perspective_projection(
@@ -454,6 +520,10 @@ vec3f_t vec3f_from_vec3i(const vec3i_t vec) {
 
 vec3i_t vec3i_from_vec3f(const vec3f_t vec) {
   return (vec3i_t){(int)roundf(vec.x), (int)roundf(vec.y), (int)roundf(vec.z)};
+}
+
+vec3f_t vec3f_from_mat34f(const mat34f_t mat) {
+  return (vec3f_t){mat.elem[3], mat.elem[7], mat.elem[11]};
 }
 
 point2i_t point2i_add_vec2i(const point2i_t point, const vec2i_t vec) {
