@@ -83,8 +83,22 @@ typedef struct mat34f_t {
   float elem[12];
 } mat34f_t;
 
+typedef struct plane_t {
+  point3f_t point;
+  vec3f_t normal;
+} plane_t;
+
 void swapf(float* lhs, float* rhs);
 void swapi(int* lhs, int* rhs);
+
+int clampi(int value, int min, int max);
+float clampf(float value, float min, float max);
+
+int maxi(int lhs, int rhs);
+float maxf(float lhs, float rhs);
+
+int mini(int lhs, int rhs);
+int minf(float lhs, float rhs);
 
 float radians_from_degrees(float degrees);
 float degrees_from_radians(float radians);
@@ -136,15 +150,6 @@ mat44f_t mat44f_perspective_projection(
 
 point4f_t mat44f_multiply_point4f(mat44f_t mat, point4f_t point);
 point4f_t mat44f_project_point3f(mat44f_t projection, point3f_t point);
-
-int clampi(int value, int min, int max);
-float clampf(float value, float min, float max);
-
-int maxi(int lhs, int rhs);
-float maxf(float lhs, float rhs);
-
-int mini(int lhs, int rhs);
-int minf(float lhs, float rhs);
 
 vec2f_t vec2f_from_point2f(point2f_t point);
 vec3f_t vec3f_from_point3f(point3f_t point);
@@ -216,5 +221,9 @@ float vec3f_dot_vec3f(vec3f_t lhs, vec3f_t rhs);
 
 vec2f_t vec2f_normalized(vec2f_t vec);
 vec3f_t vec3f_normalized(vec3f_t vec);
+
+vec3f_t vec3f_x_axis(void);
+vec3f_t vec3f_y_axis(void);
+vec3f_t vec3f_z_axis(void);
 
 #endif // MATH_TYPES_H

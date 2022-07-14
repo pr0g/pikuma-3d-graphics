@@ -703,3 +703,15 @@ vec2f_t vec2f_normalized(const vec2f_t vec) {
 vec3f_t vec3f_normalized(const vec3f_t vec) {
   return vec3f_div_scalar(vec, vec3f_length(vec));
 }
+
+vec3f_t vec3f_x_axis(void) {
+  return (vec3f_t){.x = 1.0f};
+}
+
+vec3f_t vec3f_y_axis(void) {
+  return (vec3f_t){.y = 1.0f};
+}
+
+vec3f_t vec3f_z_axis(void) {
+  return (vec3f_t){.z = 1.0f};
+}
