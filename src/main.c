@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "display.h"
 #include "fps.h"
+#include "frustum.h"
 #include "lighting.h"
 #include "math-types.h"
 #include "mesh.h"
@@ -28,6 +29,7 @@ Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_textured;
 bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
+frustum_planes_t g_frustum_planes;
 const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
 texture_t g_texture;
 int g_projected_count = 0; // triangles projected on a given frame
@@ -37,15 +39,17 @@ void setup(void) {
   create_depth_buffer();
   load_obj_mesh_data("assets/cube.obj");
   // load_cube_mesh_data();
-  g_perspective_projection = mat44f_perspective_projection(
-    (float)window_width() / (float)window_height(),
-    radians_from_degrees(60.0f),
-    0.1f,
-    100.0f);
+  const float aspect_ratio = (float)window_width() / (float)window_height();
+  const float fov = radians_from_degrees(60.0f);
+  const float near = 0.1f;
+  const float far = 100.0f;
+  g_perspective_projection =
+    mat44f_perspective_projection(aspect_ratio, fov, near, far);
+  g_frustum_planes = build_frustum_planes(aspect_ratio, fov, near, far);
   g_texture = load_png_texture_data("assets/redbrick.png");
 
-  g_camera.pivot = (point3f_t){.x = 0.0f, .y = 0.0f, .z = 5.0f};
-  g_camera.offset = (vec3f_t){.z = -5.0f};
+  g_camera.pivot = (point3f_t){.x = 0.0f, .y = 0.0f, .z = -5.0f};
+  g_camera.offset = (vec3f_t){.z = 0.0f};
 }
 
 bool process_input(void) {
