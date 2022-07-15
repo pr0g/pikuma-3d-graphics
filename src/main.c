@@ -8,6 +8,7 @@
 #include "lighting.h"
 #include "math-types.h"
 #include "mesh.h"
+#include "polygon.h"
 #include "texture.h"
 #include "upng/upng.h"
 
@@ -48,7 +49,7 @@ void setup(void) {
   g_frustum_planes = build_frustum_planes(aspect_ratio, fov, near, far);
   g_texture = load_png_texture_data("assets/redbrick.png");
 
-  g_camera.pivot = (point3f_t){.x = 0.0f, .y = 0.0f, .z = -5.0f};
+  g_camera.pivot = (point3f_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
   g_camera.offset = (vec3f_t){.z = 0.0f};
 }
 
@@ -164,7 +165,7 @@ void update(void) {
   calculate_framerate();
 
   g_model.rotation =
-    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.0f, delta_time * 0.5f, 0.0f});
+    vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.0f, delta_time * 0.0f, 0.0f});
   // vec3f_add_vec3f(g_model.scale, (vec3f_t){0.002f, 0.0f, 0.0f});
   // g_model.scale = (vec3f_t){0.5f, 0.5f, 0.5f};
   // g_model.translation =
@@ -192,16 +193,16 @@ void update(void) {
       g_model.mesh.vertices[mesh_face.vert_indices[1] - 1],
       g_model.mesh.vertices[mesh_face.vert_indices[2] - 1]};
 
-    point3f_t transformed_vertices[3];
+    triangle_t transformed_triangle;
     for (int v = 0; v < 3; ++v) {
       const mat34f_t cam = camera_view(g_camera);
-      transformed_vertices[v] = mat34f_multiply_point3f(
+      transformed_triangle.vertices[v] = mat34f_multiply_point3f(
         cam, mat34f_multiply_point3f(model_transform, face_vertices[v]));
     }
 
-    const point3f_t a = transformed_vertices[0];
-    const point3f_t b = transformed_vertices[1];
-    const point3f_t c = transformed_vertices[2];
+    const point3f_t a = transformed_triangle.vertices[0];
+    const point3f_t b = transformed_triangle.vertices[1];
+    const point3f_t c = transformed_triangle.vertices[2];
     const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
     const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
     const vec3f_t normal =
@@ -215,6 +216,10 @@ void update(void) {
       }
     }
 
+    // clipping
+    polygon_t polygon = build_polygon_from_triangle(transformed_triangle);
+    clip_polygon_against_frustum(&polygon, g_frustum_planes);
+
     g_projected_count++;
 
     projected_triangle_t projected_triangle = {
@@ -227,7 +232,7 @@ void update(void) {
 
     for (int v = 0; v < 3; ++v) {
       const point4f_t projected_point = mat44f_project_point3f(
-        g_perspective_projection, transformed_vertices[v]);
+        g_perspective_projection, transformed_triangle.vertices[v]);
 
       const point2f_t projected_point_2d = mat22f_multiply_point2f(
         mat22f_scale_from_floats(

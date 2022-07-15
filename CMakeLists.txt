@@ -25,6 +25,7 @@ target_sources(
           src/texture.c
           src/camera.c
           src/frustum.c
+          src/polygon.c
           third-party/upng/upng.c)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 target_compile_options(

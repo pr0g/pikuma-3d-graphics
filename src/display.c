@@ -5,7 +5,7 @@
 
 #include <SDL.h>
 
-#include <stdio.h>
+#include <stddef.h>
 
 // global data
 static struct SDL_Window* s_window = NULL;
