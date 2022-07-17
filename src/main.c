@@ -23,6 +23,15 @@ typedef enum display_mode_e {
   display_mode_textured_wireframe
 } display_mode_e;
 
+typedef enum movement_e {
+  movement_up = 1 << 0,
+  movement_down = 1 << 1,
+  movement_left = 1 << 2,
+  movement_right = 1 << 3,
+  movement_forward = 1 << 4,
+  movement_backward = 1 << 5
+} movement_e;
+
 projected_triangle_t* g_triangles_to_render = NULL;
 camera_t g_camera = {};
 uint64_t g_previous_frame_time = 0;
@@ -34,6 +43,9 @@ frustum_planes_t g_frustum_planes;
 const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
 texture_t g_texture;
 int g_projected_count = 0; // triangles projected on a given frame
+point2i_t g_mouse_position = {0, 0};
+bool g_mouse_down = false;
+int8_t g_movement = 0;
 
 void setup(void) {
   create_color_buffer();
@@ -54,66 +66,79 @@ void setup(void) {
 }
 
 bool process_input(void) {
-  SDL_Event event;
-  SDL_PollEvent(&event);
-  switch (event.type) {
-    case SDL_QUIT:
-      return false;
-    case SDL_KEYDOWN:
-      if (event.key.keysym.sym == SDLK_ESCAPE) {
+  for (SDL_Event event; SDL_PollEvent(&event) != 0;) {
+    switch (event.type) {
+      case SDL_QUIT:
         return false;
-      }
-      if (event.key.keysym.sym == SDLK_1) {
-        g_display_mode = display_mode_wireframe_vertices;
-      } else if (event.key.keysym.sym == SDLK_2) {
-        g_display_mode = display_mode_wireframe;
-      } else if (event.key.keysym.sym == SDLK_3) {
-        g_display_mode = display_mode_filled;
-      } else if (event.key.keysym.sym == SDLK_4) {
-        g_display_mode = display_mode_filled_wireframe;
-      } else if (event.key.keysym.sym == SDLK_5) {
-        g_display_mode = display_mode_textured;
-      } else if (event.key.keysym.sym == SDLK_6) {
-        g_display_mode = display_mode_textured_wireframe;
-      } else if (event.key.keysym.sym == SDLK_c) {
-        g_backface_culling = !g_backface_culling;
-      } else if (event.key.keysym.sym == SDLK_LEFT) {
-        g_camera.yaw -= 0.01f;
-      } else if (event.key.keysym.sym == SDLK_RIGHT) {
-        g_camera.yaw += 0.01f;
-      } else if (event.key.keysym.sym == SDLK_UP) {
-        g_camera.pitch -= 0.01f;
-      } else if (event.key.keysym.sym == SDLK_DOWN) {
-        g_camera.pitch += 0.01f;
-      } else if (event.key.keysym.sym == SDLK_w) {
-        const mat33f_t rotation = camera_rotation(g_camera);
-        g_camera.pivot = point3f_add_vec3f(
-          g_camera.pivot,
-          mat33f_multiply_vec3f(rotation, (vec3f_t){0.0f, 0.0f, 0.1f}));
-      } else if (event.key.keysym.sym == SDLK_a) {
-        const mat33f_t rotation = camera_rotation(g_camera);
-        g_camera.pivot = point3f_add_vec3f(
-          g_camera.pivot,
-          mat33f_multiply_vec3f(rotation, (vec3f_t){-0.1f, 0.0f, 0.0f}));
-      } else if (event.key.keysym.sym == SDLK_s) {
-        const mat33f_t rotation = camera_rotation(g_camera);
-        g_camera.pivot = point3f_add_vec3f(
-          g_camera.pivot,
-          mat33f_multiply_vec3f(rotation, (vec3f_t){0.0f, 0.0f, -0.1f}));
-      } else if (event.key.keysym.sym == SDLK_d) {
-        const mat33f_t rotation = camera_rotation(g_camera);
-        g_camera.pivot = point3f_add_vec3f(
-          g_camera.pivot,
-          mat33f_multiply_vec3f(rotation, (vec3f_t){0.1f, 0.0f, 0.0f}));
-      } else if (event.key.keysym.sym == SDLK_q) {
-        g_camera.pivot =
-          point3f_add_vec3f(g_camera.pivot, (vec3f_t){0.0f, -0.1f, 0.0f});
-      } else if (event.key.keysym.sym == SDLK_e) {
-        g_camera.pivot =
-          point3f_add_vec3f(g_camera.pivot, (vec3f_t){0.0f, 0.1f, 0.0f});
-      }
-    default:
-      break;
+      case SDL_MOUSEMOTION: {
+        const SDL_MouseMotionEvent* mouse_motion_event =
+          (const SDL_MouseMotionEvent*)&event;
+        const point2i_t previous_mouse_position = g_mouse_position;
+        g_mouse_position =
+          (point2i_t){.x = mouse_motion_event->x, .y = mouse_motion_event->y};
+        if (g_mouse_down) {
+          const vec2i_t mouse_delta =
+            point2i_sub_point2i(g_mouse_position, previous_mouse_position);
+          g_camera.pitch += mouse_delta.y * 0.01f;
+          g_camera.yaw += mouse_delta.x * 0.01f;
+        }
+      } break;
+      case SDL_MOUSEBUTTONDOWN: {
+        g_mouse_down = true;
+      } break;
+      case SDL_MOUSEBUTTONUP: {
+        g_mouse_down = false;
+      } break;
+      case SDL_KEYDOWN: {
+        if (event.key.keysym.sym == SDLK_ESCAPE) {
+          return false;
+        }
+        if (event.key.keysym.sym == SDLK_1) {
+          g_display_mode = display_mode_wireframe_vertices;
+        } else if (event.key.keysym.sym == SDLK_2) {
+          g_display_mode = display_mode_wireframe;
+        } else if (event.key.keysym.sym == SDLK_3) {
+          g_display_mode = display_mode_filled;
+        } else if (event.key.keysym.sym == SDLK_4) {
+          g_display_mode = display_mode_filled_wireframe;
+        } else if (event.key.keysym.sym == SDLK_5) {
+          g_display_mode = display_mode_textured;
+        } else if (event.key.keysym.sym == SDLK_6) {
+          g_display_mode = display_mode_textured_wireframe;
+        } else if (event.key.keysym.sym == SDLK_c) {
+          g_backface_culling = !g_backface_culling;
+        } else if (event.key.keysym.sym == SDLK_w) {
+          g_movement |= movement_forward;
+        } else if (event.key.keysym.sym == SDLK_a) {
+          g_movement |= movement_left;
+        } else if (event.key.keysym.sym == SDLK_s) {
+          g_movement |= movement_backward;
+        } else if (event.key.keysym.sym == SDLK_d) {
+          g_movement |= movement_right;
+        } else if (event.key.keysym.sym == SDLK_q) {
+          g_movement |= movement_down;
+        } else if (event.key.keysym.sym == SDLK_e) {
+          g_movement |= movement_up;
+        }
+      } break;
+      case SDL_KEYUP: {
+        if (event.key.keysym.sym == SDLK_w) {
+          g_movement &= ~movement_forward;
+        } else if (event.key.keysym.sym == SDLK_a) {
+          g_movement &= ~movement_left;
+        } else if (event.key.keysym.sym == SDLK_s) {
+          g_movement &= ~movement_backward;
+        } else if (event.key.keysym.sym == SDLK_d) {
+          g_movement &= ~movement_right;
+        } else if (event.key.keysym.sym == SDLK_q) {
+          g_movement &= ~movement_down;
+        } else if (event.key.keysym.sym == SDLK_e) {
+          g_movement &= ~movement_up;
+        }
+      } break;
+      default:
+        break;
+    }
   }
   return true;
 }
@@ -156,6 +181,31 @@ void calculate_framerate(void) {
   }
 }
 
+static void update_movement(const float delta_time) {
+  const float speed = delta_time * 10.0f;
+  if ((g_movement & movement_forward) != 0) {
+    const mat33f_t rotation = camera_rotation(g_camera);
+    g_camera.pivot = point3f_add_vec3f(
+      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.z = speed}));
+  } else if ((g_movement & movement_left) != 0) {
+    const mat33f_t rotation = camera_rotation(g_camera);
+    g_camera.pivot = point3f_add_vec3f(
+      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.x = -speed}));
+  } else if ((g_movement & movement_backward) != 0) {
+    const mat33f_t rotation = camera_rotation(g_camera);
+    g_camera.pivot = point3f_add_vec3f(
+      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.z = -speed}));
+  } else if ((g_movement & movement_right) != 0) {
+    const mat33f_t rotation = camera_rotation(g_camera);
+    g_camera.pivot = point3f_add_vec3f(
+      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.x = speed}));
+  } else if ((g_movement & movement_down) != 0) {
+    g_camera.pivot = point3f_add_vec3f(g_camera.pivot, (vec3f_t){.y = -speed});
+  } else if ((g_movement & movement_up) != 0) {
+    g_camera.pivot = point3f_add_vec3f(g_camera.pivot, (vec3f_t){.y = speed});
+  }
+}
+
 void update(void) {
   const double delta_time =
     seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
@@ -163,6 +213,8 @@ void update(void) {
 
   wait_to_update();
   calculate_framerate();
+
+  update_movement(delta_time);
 
   g_model.rotation =
     vec3f_add_vec3f(g_model.rotation, (vec3f_t){0.0f, delta_time * 0.0f, 0.0f});
