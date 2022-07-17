@@ -40,10 +40,10 @@ display_mode_e g_display_mode = display_mode_textured;
 bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
 frustum_planes_t g_frustum_planes;
-const vec3f_t g_light_direction = {0.0f, 0.0f, 1.0f};
+const vec3f_t g_light_direction = {.z = 1.0f};
 texture_t g_texture;
 int g_projected_count = 0; // triangles projected on a given frame
-point2i_t g_mouse_position = {0, 0};
+point2i_t g_mouse_position = {};
 bool g_mouse_down = false;
 int8_t g_movement = 0;
 
@@ -245,11 +245,12 @@ void update(void) {
       g_model.mesh.vertices[mesh_face.vert_indices[1] - 1],
       g_model.mesh.vertices[mesh_face.vert_indices[2] - 1]};
 
+    const mat34f_t view = camera_view(g_camera);
+
     triangle_t transformed_triangle;
     for (int v = 0; v < 3; ++v) {
-      const mat34f_t cam = camera_view(g_camera);
       transformed_triangle.vertices[v] = mat34f_multiply_point3f(
-        cam, mat34f_multiply_point3f(model_transform, face_vertices[v]));
+        view, mat34f_multiply_point3f(model_transform, face_vertices[v]));
     }
 
     const point3f_t a = transformed_triangle.vertices[0];
@@ -276,7 +277,9 @@ void update(void) {
 
     projected_triangle_t projected_triangle = {
       .color = apply_light_intensity(
-        0xffffff, -vec3f_dot_vec3f(normal, g_light_direction)),
+        0xffffff,
+        -vec3f_dot_vec3f(
+          normal, mat34f_multiply_vec3f(view, g_light_direction))),
       .vertices = {
         {.uv = g_model.mesh.uvs[mesh_face.uv_indices[0] - 1]},
         {.uv = g_model.mesh.uvs[mesh_face.uv_indices[1] - 1]},

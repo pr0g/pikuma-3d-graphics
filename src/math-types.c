@@ -219,6 +219,13 @@ vec3f_t mat33f_multiply_vec3f(const mat33f_t mat, const vec3f_t vec) {
     .z = mat.elem[6] * vec.x + mat.elem[7] * vec.y + mat.elem[8] * vec.z};
 }
 
+vec3f_t mat34f_multiply_vec3f(const mat34f_t mat, const vec3f_t vec) {
+  return (vec3f_t){
+    .x = mat.elem[0] * vec.x + mat.elem[1] * vec.y + mat.elem[2] * vec.z,
+    .y = mat.elem[4] * vec.x + mat.elem[5] * vec.y + mat.elem[6] * vec.z,
+    .z = mat.elem[8] * vec.x + mat.elem[9] * vec.y + mat.elem[10] * vec.z};
+}
+
 mat33f_t mat33f_multiply_mat33f(const mat33f_t lhs, const mat33f_t rhs) {
   return (mat33f_t){
     .elem = {

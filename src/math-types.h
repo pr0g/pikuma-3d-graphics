@@ -137,6 +137,7 @@ point3f_t mat33f_multiply_point3f(mat33f_t mat, point3f_t point);
 point3f_t mat34f_multiply_point3f(mat34f_t mat, point3f_t point);
 
 vec3f_t mat33f_multiply_vec3f(mat33f_t mat, vec3f_t vec);
+vec3f_t mat34f_multiply_vec3f(mat34f_t mat, vec3f_t vec);
 
 mat33f_t mat33f_multiply_mat33f(mat33f_t lhs, mat33f_t rhs);
 mat34f_t mat34f_multiply_mat34f(mat34f_t lhs, mat34f_t rhs);
