@@ -16,20 +16,22 @@ static void clip_polygon_against_plane(
   polygon_t* polygon, const plane_t plane) {
   point3f_t* inside_vertices = NULL;
 
-  point3f_t* current_vertex = &polygon->vertices[0];
-  point3f_t* const last_vertex =
-    &polygon->vertices[array_length(&polygon->vertices) - 1];
-  point3f_t* previous_vertex = last_vertex;
+  const point3f_t* current_vertex = &polygon->vertices[0];
+  const point3f_t* previous_vertex =
+    &polygon->vertices[array_length(polygon->vertices) - 1];
 
   float previous_dot = vec3f_dot_vec3f(
     point3f_sub_point3f(*previous_vertex, plane.point), plane.normal); // q2
 
-  while (current_vertex != last_vertex) {
+  while (current_vertex
+         != &polygon->vertices[array_length(polygon->vertices)]) {
     const float current_dot = vec3f_dot_vec3f(
       point3f_sub_point3f(*current_vertex, plane.point), plane.normal); // q1
     // if we changed from inside to outside
     if (current_dot * previous_dot < 0.0f) {
-      point3f_t intersection_point = {}; // // calculate intersection point
+      const float t = previous_dot / (previous_dot - current_dot);
+      const point3f_t intersection_point =
+        point3f_mix(*previous_vertex, *current_vertex, t);
       array_push(inside_vertices, intersection_point);
     }
     if (current_dot > 0.0f) {
