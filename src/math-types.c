@@ -35,6 +35,25 @@ int mat44_rc(const int r, const int c) {
   return mat_rc(r, c, 4);
 }
 
+float mixf(const float begin, const float end, const float t) {
+  return (1.0f - t) * begin + t * end;
+}
+
+point3f_t point3f_mix(
+  const point3f_t begin, const point3f_t end, const float t) {
+  return (point3f_t){
+    .x = mixf(begin.x, end.x, t),
+    .y = mixf(begin.y, end.y, t),
+    .z = mixf(begin.z, end.z, t)};
+}
+
+vec3f_t vec3f_mix(const vec3f_t begin, const vec3f_t end, const float t) {
+  return (vec3f_t){
+    .x = mixf(begin.x, end.x, t),
+    .y = mixf(begin.y, end.y, t),
+    .z = mixf(begin.z, end.z, t)};
+}
+
 float radians_from_degrees(const float degrees) {
   return degrees * (k_pi / 180.0f);
 }

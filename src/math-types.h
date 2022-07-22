@@ -107,6 +107,11 @@ int mat22_rc(int r, int c);
 int mat33_rc(int r, int c);
 int mat44_rc(int r, int c);
 
+float mixf(float begin, float end, float t);
+
+point3f_t point3f_mix(point3f_t begin, point3f_t end, float t);
+vec3f_t vec3f_mix(vec3f_t begin, vec3f_t end, float t);
+
 mat22f_t mat22f_identity(void);
 mat33f_t mat33f_identity(void);
 mat34f_t mat34f_identity(void);
