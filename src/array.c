@@ -31,7 +31,7 @@ void* array_hold(void* array, const int count, const int item_size) {
 }
 
 int array_length(void* array) {
-    return (array != NULL) ? ARRAY_OCCUPIED(array) : 0;
+    return (array != NULL) ? (ARRAY_OCCUPIED(array)) : 0;
 }
 
 void array_free(void* array) {
