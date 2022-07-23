@@ -62,7 +62,7 @@ point2i_t point2i_at_proportion_of_size2i(
     (int)floorf((float)size.height * uv.v)};
 }
 
-texture_t load_png_texture_data(const char* filename) {
+texture_t load_png_texture(const char* filename) {
   upng_t* texture = upng_new_from_file(filename);
   if (texture != NULL) {
     upng_decode(texture);

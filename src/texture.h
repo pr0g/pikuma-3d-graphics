@@ -44,6 +44,6 @@ tex2f_t calculate_uv(
   tex2f_t uv2,
   float w2);
 
-texture_t load_png_texture_data(const char* filename);
+texture_t load_png_texture(const char* filename);
 
 #endif // TEXTURE_H

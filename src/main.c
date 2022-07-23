@@ -65,16 +65,16 @@ void setup(void) {
     build_frustum_planes(aspect_ratio, vertical_fov, near, far);
 
   {
-    model_t model = load_obj_mesh_data("assets/cube.obj");
+    model_t model =
+      load_obj_mesh_with_png_texture("assets/cube.obj", "assets/redbrick.png");
     model.translation = (vec3f_t){.x = 2.0f, .z = 5.0f};
-    model.texture = load_png_texture_data("assets/redbrick.png");
     array_push(g_models, model);
   }
 
   {
-    model_t model = load_obj_mesh_data("assets/f22.obj");
+    model_t model =
+      load_obj_mesh_with_png_texture("assets/f22.obj", "assets/f22.png");
     model.translation = (vec3f_t){.x = -2.0f, .z = 5.0f};
-    model.texture = load_png_texture_data("assets/f22.png");
     array_push(g_models, model);
   }
 

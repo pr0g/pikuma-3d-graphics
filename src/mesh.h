@@ -19,6 +19,8 @@ typedef struct model_t {
   vec3f_t translation;
 } model_t;
 
-model_t load_obj_mesh_data(const char* filename);
+model_t load_obj_mesh(const char* mesh_path);
+model_t load_obj_mesh_with_png_texture(
+  const char* mesh_path, const char* texture_path);
 
 #endif // MESH_H

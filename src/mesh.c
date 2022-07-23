@@ -1,15 +1,16 @@
 #include "mesh.h"
 
 #include "array.h"
+#include "texture.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-model_t load_obj_mesh_data(const char* filename) {
+model_t load_obj_mesh(const char* mesh_path) {
   model_t model = (model_t){.scale = (vec3f_t){1.0f, 1.0f, 1.0f}};
 
-  FILE* file = fopen(filename, "r");
+  FILE* file = fopen(mesh_path, "r");
 
   char buffer[128];
   buffer[0] = '\0';
@@ -69,5 +70,12 @@ model_t load_obj_mesh_data(const char* filename) {
     }
   }
   fclose(file);
+  return model;
+}
+
+model_t load_obj_mesh_with_png_texture(
+  const char* mesh_path, const char* texture_path) {
+  model_t model = load_obj_mesh(mesh_path);
+  model.texture = load_png_texture(texture_path);
   return model;
 }
