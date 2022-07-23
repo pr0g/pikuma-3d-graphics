@@ -188,21 +188,26 @@ static void update_movement(const float delta_time) {
     const mat33f_t rotation = camera_rotation(g_camera);
     g_camera.pivot = point3f_add_vec3f(
       g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.z = speed}));
-  } else if ((g_movement & movement_left) != 0) {
+  }
+  if ((g_movement & movement_left) != 0) {
     const mat33f_t rotation = camera_rotation(g_camera);
     g_camera.pivot = point3f_add_vec3f(
       g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.x = -speed}));
-  } else if ((g_movement & movement_backward) != 0) {
+  }
+  if ((g_movement & movement_backward) != 0) {
     const mat33f_t rotation = camera_rotation(g_camera);
     g_camera.pivot = point3f_add_vec3f(
       g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.z = -speed}));
-  } else if ((g_movement & movement_right) != 0) {
+  }
+  if ((g_movement & movement_right) != 0) {
     const mat33f_t rotation = camera_rotation(g_camera);
     g_camera.pivot = point3f_add_vec3f(
       g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.x = speed}));
-  } else if ((g_movement & movement_down) != 0) {
+  }
+  if ((g_movement & movement_down) != 0) {
     g_camera.pivot = point3f_add_vec3f(g_camera.pivot, (vec3f_t){.y = -speed});
-  } else if ((g_movement & movement_up) != 0) {
+  }
+  if ((g_movement & movement_up) != 0) {
     g_camera.pivot = point3f_add_vec3f(g_camera.pivot, (vec3f_t){.y = speed});
   }
 }
