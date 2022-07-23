@@ -1,11 +1,13 @@
 #include "texture.h"
 
-#include "triangle.h"
-
 #include <math.h>
 #include <stdio.h>
 
-tex2f_t tex2f_div_scalar(tex2f_t tex, float scale) {
+tex2f_t tex2f_mix(const tex2f_t begin, const tex2f_t end, const float t) {
+  return (tex2f_t){.u = mixf(begin.u, end.u, t), .v = mixf(begin.v, end.v, t)};
+}
+
+tex2f_t tex2f_div_scalar(const tex2f_t tex, const float scale) {
   return (tex2f_t){tex.u / scale, tex.v / scale};
 }
 
@@ -68,8 +70,8 @@ texture_t load_png_texture_data(const char* filename) {
       return (texture_t){
         .png_texture = texture,
         .color_buffer = (uint32_t*)upng_get_buffer(texture),
-        .width = upng_get_width(texture),
-        .height = upng_get_height(texture)};
+        .width = (int)upng_get_width(texture),
+        .height = (int)upng_get_height(texture)};
     }
   }
   return (texture_t){};

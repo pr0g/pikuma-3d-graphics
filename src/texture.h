@@ -26,8 +26,10 @@ typedef struct texture_t {
   int height;
 } texture_t;
 
-vec3f_t vec3f_from_barycentric_coords(barycentric_coords_t barycentric_coords);
+tex2f_t tex2f_mix(tex2f_t begin, tex2f_t end, float t);
 tex2f_t tex2f_div_scalar(tex2f_t tex, float scale);
+
+vec3f_t vec3f_from_barycentric_coords(barycentric_coords_t barycentric_coords);
 point2i_t point2i_at_proportion_of_size2i(size2i_t size, tex2f_t uv);
 
 barycentric_coords_t calculate_barycentric_coordinates(

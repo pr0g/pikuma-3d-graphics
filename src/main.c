@@ -247,16 +247,17 @@ void update(void) {
       g_model.mesh.vertices[mesh_face.vert_indices[2] - 1]};
 
     const mat34f_t view = camera_view(g_camera);
-
-    triangle_t transformed_triangle;
+    uv_triangle_t transformed_triangle;
     for (int v = 0; v < 3; ++v) {
-      transformed_triangle.vertices[v] = mat34f_multiply_point3f(
+      transformed_triangle.triangle.vertices[v] = mat34f_multiply_point3f(
         view, mat34f_multiply_point3f(model_transform, face_vertices[v]));
+      transformed_triangle.uvs[v] =
+        g_model.mesh.uvs[mesh_face.uv_indices[v] - 1];
     }
 
-    const point3f_t a = transformed_triangle.vertices[0];
-    const point3f_t b = transformed_triangle.vertices[1];
-    const point3f_t c = transformed_triangle.vertices[2];
+    const point3f_t a = transformed_triangle.triangle.vertices[0];
+    const point3f_t b = transformed_triangle.triangle.vertices[1];
+    const point3f_t c = transformed_triangle.triangle.vertices[2];
     const vec3f_t edge_ab = vec3f_normalized(point3f_sub_point3f(b, a));
     const vec3f_t edge_ac = vec3f_normalized(point3f_sub_point3f(c, a));
     const vec3f_t normal =
@@ -271,11 +272,11 @@ void update(void) {
     }
 
     // clipping
-    polygon_t polygon = build_polygon_from_triangle(transformed_triangle);
+    polygon_t polygon = build_polygon_from_uv_triangle(transformed_triangle);
     clip_polygon_against_frustum(&polygon, g_frustum_planes);
 
     // triangulate polygon
-    triangle_t* clipped_triangles = triangles_from_polygon(polygon);
+    uv_triangle_t* clipped_triangles = uv_triangles_from_polygon(polygon);
 
     const int triangle_count = array_length(clipped_triangles);
     for (int t = 0; t < triangle_count; ++t) {
@@ -286,13 +287,13 @@ void update(void) {
           -vec3f_dot_vec3f(
             normal, mat34f_multiply_vec3f(view, g_light_direction))),
         .vertices = {
-          {.uv = g_model.mesh.uvs[mesh_face.uv_indices[0] - 1]},
-          {.uv = g_model.mesh.uvs[mesh_face.uv_indices[1] - 1]},
-          {.uv = g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}}};
+          {.uv = clipped_triangles[t].uvs[0]},
+          {.uv = clipped_triangles[t].uvs[1]},
+          {.uv = clipped_triangles[t].uvs[2]}}};
 
       for (int v = 0; v < 3; ++v) {
         const point4f_t projected_point = mat44f_project_point3f(
-          g_perspective_projection, clipped_triangles[t].vertices[v]);
+          g_perspective_projection, clipped_triangles[t].triangle.vertices[v]);
 
         const point2f_t projected_point_2d = mat22f_multiply_point2f(
           mat22f_scale_from_floats(
@@ -313,6 +314,7 @@ void update(void) {
       }
     }
 
+    array_free(polygon.uvs);
     array_free(polygon.vertices);
     array_free(clipped_triangles);
   }
