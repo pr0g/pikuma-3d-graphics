@@ -1,5 +1,3 @@
-#include <SDL.h>
-
 #include "array.h"
 #include "camera.h"
 #include "display.h"
@@ -11,6 +9,8 @@
 #include "polygon.h"
 #include "texture.h"
 #include "upng/upng.h"
+
+#include <SDL.h>
 
 #include <assert.h>
 
