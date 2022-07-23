@@ -44,7 +44,6 @@ void render_color_buffer(void);
 void clear_color_buffer(uint32_t color);
 void clear_depth_buffer(void);
 
-void renderer_clear(void);
 void renderer_present(void);
 
 int window_width(void);

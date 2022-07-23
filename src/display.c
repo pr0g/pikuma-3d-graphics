@@ -372,11 +372,6 @@ void destroy_depth_buffer(void) {
   free(s_depth_buffer);
 }
 
-void renderer_clear(void) {
-  SDL_SetRenderDrawColor(s_renderer, 255, 0, 0, 255);
-  SDL_RenderClear(s_renderer);
-}
-
 void renderer_present(void) {
   SDL_RenderPresent(s_renderer);
 }
