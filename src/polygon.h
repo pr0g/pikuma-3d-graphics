@@ -13,7 +13,10 @@ typedef struct polygon_t {
 } polygon_t;
 
 polygon_t build_polygon_from_triangle(triangle_t triangle);
+
 void clip_polygon_against_frustum(
   polygon_t* polygon, frustum_planes_t frustum_planes);
+
+triangle_t* triangles_from_polygon(polygon_t polygon);
 
 #endif // POLYGON_H

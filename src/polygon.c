@@ -56,3 +56,17 @@ void clip_polygon_against_frustum(
     clip_polygon_against_plane(polygon, frustum_planes.planes[plane_index]);
   }
 }
+
+triangle_t* triangles_from_polygon(const polygon_t polygon) {
+  triangle_t* triangles = NULL;
+  const int triangle_count = array_length(polygon.vertices) - 2;
+  for (int v = 0; v < triangle_count; ++v) {
+    const triangle_t triangle = (triangle_t){
+      .vertices = {
+        [0] = polygon.vertices[0],
+        [1] = polygon.vertices[v + 1],
+        [2] = polygon.vertices[v + 2]}};
+    array_push(triangles, triangle);
+  }
+  return triangles;
+}

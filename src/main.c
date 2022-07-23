@@ -273,39 +273,47 @@ void update(void) {
     polygon_t polygon = build_polygon_from_triangle(transformed_triangle);
     clip_polygon_against_frustum(&polygon, g_frustum_planes);
 
-    g_projected_count++;
+    // triangulate polygon
+    triangle_t* clipped_triangles = triangles_from_polygon(polygon);
 
-    projected_triangle_t projected_triangle = {
-      .color = apply_light_intensity(
-        0xffffff,
-        -vec3f_dot_vec3f(
-          normal, mat34f_multiply_vec3f(view, g_light_direction))),
-      .vertices = {
-        {.uv = g_model.mesh.uvs[mesh_face.uv_indices[0] - 1]},
-        {.uv = g_model.mesh.uvs[mesh_face.uv_indices[1] - 1]},
-        {.uv = g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}}};
+    const int triangle_count = array_length(clipped_triangles);
+    for (int t = 0; t < triangle_count; ++t) {
+      g_projected_count++;
+      projected_triangle_t projected_triangle = {
+        .color = apply_light_intensity(
+          0xffffff,
+          -vec3f_dot_vec3f(
+            normal, mat34f_multiply_vec3f(view, g_light_direction))),
+        .vertices = {
+          {.uv = g_model.mesh.uvs[mesh_face.uv_indices[0] - 1]},
+          {.uv = g_model.mesh.uvs[mesh_face.uv_indices[1] - 1]},
+          {.uv = g_model.mesh.uvs[mesh_face.uv_indices[2] - 1]}}};
 
-    for (int v = 0; v < 3; ++v) {
-      const point4f_t projected_point = mat44f_project_point3f(
-        g_perspective_projection, transformed_triangle.vertices[v]);
+      for (int v = 0; v < 3; ++v) {
+        const point4f_t projected_point = mat44f_project_point3f(
+          g_perspective_projection, clipped_triangles[t].vertices[v]);
 
-      const point2f_t projected_point_2d = mat22f_multiply_point2f(
-        mat22f_scale_from_floats(
-          (float)window_width() / 2.0f, (float)window_height() / -2.0f),
-        point2f_from_point4f(projected_point));
+        const point2f_t projected_point_2d = mat22f_multiply_point2f(
+          mat22f_scale_from_floats(
+            (float)window_width() / 2.0f, (float)window_height() / -2.0f),
+          point2f_from_point4f(projected_point));
 
-      projected_triangle.vertices[v].point = point2i_add_vec2i(
-        point2i_from_point2f(projected_point_2d),
-        (vec2i_t){window_width() / 2, window_height() / 2});
-      projected_triangle.vertices[v].z = projected_point.z;
-      projected_triangle.vertices[v].w = projected_point.w;
+        projected_triangle.vertices[v].point = point2i_add_vec2i(
+          point2i_from_point2f(projected_point_2d),
+          (vec2i_t){window_width() / 2, window_height() / 2});
+        projected_triangle.vertices[v].z = projected_point.z;
+        projected_triangle.vertices[v].w = projected_point.w;
+      }
+
+      if (array_length(g_triangles_to_render) < g_projected_count) {
+        array_push(g_triangles_to_render, projected_triangle);
+      } else {
+        g_triangles_to_render[g_projected_count - 1] = projected_triangle;
+      }
     }
 
-    if (array_length(g_triangles_to_render) < g_projected_count) {
-      array_push(g_triangles_to_render, projected_triangle);
-    } else {
-      g_triangles_to_render[g_projected_count - 1] = projected_triangle;
-    }
+    array_free(polygon.vertices);
+    array_free(clipped_triangles);
   }
 }
 
