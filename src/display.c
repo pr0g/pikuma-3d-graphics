@@ -13,7 +13,7 @@ static struct SDL_Renderer* s_renderer = NULL;
 static uint32_t* s_color_buffer = NULL;
 static struct SDL_Texture* s_color_buffer_texture = NULL;
 static float* s_depth_buffer = NULL;
-
+// default/fallback window width/height
 static int s_window_width = 800;
 static int s_window_height = 600;
 
@@ -39,15 +39,19 @@ bool initialize_window(void) {
 
   SDL_DisplayMode display_mode;
   SDL_GetCurrentDisplayMode(0, &display_mode);
-  s_window_width = display_mode.w;
-  s_window_height = display_mode.h;
+  const int window_width = display_mode.w;
+  const int window_height = display_mode.h;
+
+  const int scale_factor = 1; // increase to create pixelated effect
+  s_window_width = window_width / scale_factor;
+  s_window_height = window_height / scale_factor;
 
   s_window = SDL_CreateWindow(
     NULL,
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOWPOS_CENTERED,
-    s_window_width,
-    s_window_height,
+    window_width,
+    window_height,
     SDL_WINDOW_BORDERLESS);
 
   if (!s_window) {
