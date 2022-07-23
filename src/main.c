@@ -325,7 +325,8 @@ void update(void) {
 }
 
 void render(void) {
-  renderer_clear();
+  clear_color_buffer(0xff000000);
+  clear_depth_buffer();
 
   for (int i = 0, triangle_count = g_projected_count; i < triangle_count; ++i) {
     switch (g_display_mode) {
@@ -363,9 +364,6 @@ void render(void) {
   }
 
   render_color_buffer();
-  clear_color_buffer(0xff000000);
-  clear_depth_buffer();
-
   renderer_present();
 }
 
