@@ -14,15 +14,18 @@ polygon_t build_polygon_from_triangle(const triangle_t triangle) {
 
 static void clip_polygon_against_plane(
   polygon_t* polygon, const plane_t plane) {
-  point3f_t* inside_vertices = NULL;
-
   const int vertex_count = array_length(polygon->vertices);
+  if (vertex_count == 0) {
+    return;
+  }
+
   const point3f_t* current_vertex = &polygon->vertices[0];
   const point3f_t* previous_vertex = &polygon->vertices[vertex_count - 1];
 
   float previous_dot = vec3f_dot_vec3f(
     point3f_sub_point3f(*previous_vertex, plane.point), plane.normal); // q2
 
+  point3f_t* inside_vertices = NULL;
   while (current_vertex
          != &polygon->vertices[array_length(polygon->vertices)]) {
     const float current_dot = vec3f_dot_vec3f(
@@ -42,11 +45,9 @@ static void clip_polygon_against_plane(
     previous_vertex = current_vertex;
     current_vertex++;
   }
-  if (inside_vertices != NULL) {
-    // free existing vertices and replace with new vertices
-    array_free(polygon->vertices);
-    polygon->vertices = inside_vertices;
-  }
+  // free existing vertices and replace with new vertices
+  array_free(polygon->vertices);
+  polygon->vertices = inside_vertices;
 }
 
 void clip_polygon_against_frustum(
