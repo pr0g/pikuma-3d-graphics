@@ -51,7 +51,6 @@ void setup(void) {
   create_color_buffer();
   create_depth_buffer();
   load_obj_mesh_data("assets/cube.obj");
-  // load_cube_mesh_data();
   const float aspect_ratio = (float)window_width() / (float)window_height();
   const float vertical_fov = radians_from_degrees(60.0f);
   const float near = 0.1f;
