@@ -19,6 +19,6 @@ typedef struct frustum_planes_t {
 } frustum_planes_t;
 
 frustum_planes_t build_frustum_planes(
-  float aspect_ratio, float fov, float near, float far);
+  float aspect_ratio, float vertical_fov, float near, float far);
 
 #endif // FRUSTUM_H
