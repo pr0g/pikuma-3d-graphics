@@ -41,16 +41,15 @@ bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
 frustum_planes_t g_frustum_planes;
 const vec3f_t g_light_direction = {.z = 1.0f};
-texture_t g_texture;
 int g_projected_count = 0; // triangles projected on a given frame
 point2i_t g_mouse_position = {};
 bool g_mouse_down = false;
 int8_t g_movement = 0;
+model_t g_model;
 
 void setup(void) {
   create_color_buffer();
   create_depth_buffer();
-  load_obj_mesh_data("assets/cube.obj");
   const float aspect_ratio = (float)window_width() / (float)window_height();
   const float vertical_fov = radians_from_degrees(60.0f);
   const float near = 0.1f;
@@ -59,7 +58,10 @@ void setup(void) {
     mat44f_perspective_projection(aspect_ratio, vertical_fov, near, far);
   g_frustum_planes =
     build_frustum_planes(aspect_ratio, vertical_fov, near, far);
-  g_texture = load_png_texture_data("assets/redbrick.png");
+
+  g_model = load_obj_mesh_data("assets/cube.obj");
+  g_model.translation = (vec3f_t){.z = 5.0f};
+  g_model.texture = load_png_texture_data("assets/redbrick.png");
 
   g_camera.pivot = (point3f_t){.x = 0.0f, .y = 0.0f, .z = 0.0f};
   g_camera.offset = (vec3f_t){.z = 0.0f};
@@ -354,10 +356,10 @@ void render(void) {
         draw_wire_triangle(g_triangles_to_render[i], 0xff00ffff);
         break;
       case display_mode_textured:
-        draw_textured_triangle(g_triangles_to_render[i], g_texture);
+        draw_textured_triangle(g_triangles_to_render[i], g_model.texture);
         break;
       case display_mode_textured_wireframe:
-        draw_textured_triangle(g_triangles_to_render[i], g_texture);
+        draw_textured_triangle(g_triangles_to_render[i], g_model.texture);
         draw_wire_triangle(g_triangles_to_render[i], 0xffffffff);
         break;
     }
@@ -370,9 +372,10 @@ void render(void) {
 void teardown(void) {
   array_free(g_triangles_to_render);
   g_triangles_to_render = NULL;
-  upng_free(g_texture.png_texture);
+  upng_free(g_model.texture.png_texture);
   array_free(g_model.mesh.faces);
   array_free(g_model.mesh.vertices);
+  array_free(g_model.mesh.uvs);
   destroy_depth_buffer();
   destroy_color_buffer();
   deinitialize_window();

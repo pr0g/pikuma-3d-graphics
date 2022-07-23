@@ -13,13 +13,12 @@ typedef struct mesh_t {
 
 typedef struct model_t {
   mesh_t mesh;
+  texture_t texture;
   vec3f_t rotation;
   vec3f_t scale;
   vec3f_t translation;
 } model_t;
 
-extern model_t g_model;
-
-void load_obj_mesh_data(const char* filename);
+model_t load_obj_mesh_data(const char* filename);
 
 #endif // MESH_H

@@ -6,13 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-model_t g_model = {
-  (mesh_t){.faces = NULL, .vertices = NULL},
-  .scale = (vec3f_t){1.0f, 1.0f, 1.0f},
-  .rotation = (vec3f_t){0.0f, 0.0f, 0.0f},
-  .translation = (vec3f_t){0.0f, 0.0f, 5.0f}};
+model_t load_obj_mesh_data(const char* filename) {
+  model_t model = (model_t){.scale = (vec3f_t){1.0f, 1.0f, 1.0f}};
 
-void load_obj_mesh_data(const char* filename) {
   FILE* file = fopen(filename, "r");
 
   char buffer[128];
@@ -31,7 +27,7 @@ void load_obj_mesh_data(const char* filename) {
         *vertices[i++] = atof(token);
         token = strtok(NULL, separator);
       }
-      array_push(g_model.mesh.vertices, vertex);
+      array_push(model.mesh.vertices, vertex);
     } else if (strncmp(line, "vt ", 3) == 0) {
       line += 3;
       char* token = strtok(line, separator);
@@ -42,7 +38,7 @@ void load_obj_mesh_data(const char* filename) {
         *uvs[i++] = atof(token);
         token = strtok(NULL, separator);
       }
-      array_push(g_model.mesh.uvs, uv);
+      array_push(model.mesh.uvs, uv);
     } else if (strncmp(line, "f ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
@@ -69,8 +65,9 @@ void load_obj_mesh_data(const char* filename) {
         }
         token = strtok(NULL, separator);
       }
-      array_push(g_model.mesh.faces, face);
+      array_push(model.mesh.faces, face);
     }
   }
   fclose(file);
+  return model;
 }
