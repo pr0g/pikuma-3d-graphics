@@ -4,15 +4,7 @@
 #include "frustum.h"
 #include "math-types.h"
 #include "texture.h"
-
-typedef struct triangle_t {
-  point3f_t vertices[3];
-} triangle_t;
-
-typedef struct uv_triangle_t {
-  triangle_t triangle;
-  tex2f_t uvs[3];
-} uv_triangle_t;
+#include "triangle.h"
 
 typedef struct polygon_t {
   point3f_t* vertices; // array
