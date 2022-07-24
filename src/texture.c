@@ -74,5 +74,5 @@ texture_t load_png_texture(const char* filename) {
         .height = (int)upng_get_height(texture)};
     }
   }
-  return (texture_t){};
+  return (texture_t){0};
 }

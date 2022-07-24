@@ -21,7 +21,7 @@ model_t load_obj_mesh(const char* mesh_path) {
     if (strncmp(line, "v ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
-      point3f_t vertex = {};
+      point3f_t vertex = {0};
       float* vertices[] = {[0] = &vertex.x, [1] = &vertex.y, [2] = &vertex.z};
       int i = 0;
       while (token != NULL) {
@@ -32,7 +32,7 @@ model_t load_obj_mesh(const char* mesh_path) {
     } else if (strncmp(line, "vt ", 3) == 0) {
       line += 3;
       char* token = strtok(line, separator);
-      tex2f_t uv = {};
+      tex2f_t uv = {0};
       float* uvs[] = {[0] = &uv.u, [1] = &uv.v};
       int i = 0;
       while (token != NULL) {
@@ -43,7 +43,7 @@ model_t load_obj_mesh(const char* mesh_path) {
     } else if (strncmp(line, "f ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
-      face_t face = {};
+      face_t face = {0};
       int v = 0;
       int uv = 0;
       while (token != NULL) {

@@ -37,7 +37,7 @@ typedef struct projected_model_t {
   int projected_count;
 } projected_model_t;
 
-camera_t g_camera = {};
+camera_t g_camera = {0};
 uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_textured;
@@ -45,7 +45,7 @@ bool g_backface_culling = true;
 mat44f_t g_perspective_projection;
 frustum_planes_t g_frustum_planes;
 const vec3f_t g_light_direction = {.z = -0.5f, .y = -0.5f};
-point2i_t g_mouse_position = {};
+point2i_t g_mouse_position = {0};
 bool g_mouse_down = false;
 int8_t g_movement = 0;
 model_t* g_models = NULL;
@@ -249,7 +249,7 @@ static void update_movement(const float delta_time) {
 void process_graphics_pipeline(model_t* model, const mat34f_t view) {
   g_projected_model_count++;
   if (array_length(g_projected_models) < g_projected_model_count) {
-    array_push(g_projected_models, (projected_model_t){});
+    array_push(g_projected_models, (projected_model_t){0});
   }
 
   const mat33f_t scale = mat33f_scale_from_vec3f(model->scale);
@@ -291,7 +291,7 @@ void process_graphics_pipeline(model_t* model, const mat34f_t view) {
       calculate_triangle_normal(transformed_triangle.triangle);
     if (g_backface_culling) {
       const vec3f_t camera_direction = point3f_sub_point3f(
-        (point3f_t){}, transformed_triangle.triangle.vertices[0]);
+        (point3f_t){0}, transformed_triangle.triangle.vertices[0]);
       const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
       if (view_dot < 0.0f) {
         continue;
