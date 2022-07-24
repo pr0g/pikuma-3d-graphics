@@ -47,3 +47,13 @@ add_custom_target(
   COMMAND ${PROJECT_NAME}
   DEPENDS ${PROJECT_NAME}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+if (WIN32)
+  # copy the SDL2.dll to the same folder as the executable
+  add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL2::SDL2>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    VERBATIM)
+endif ()
