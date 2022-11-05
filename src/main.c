@@ -184,7 +184,6 @@ void wait_to_update(void) {
   const double seconds =
     seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
   if (seconds < seconds_per_frame()) {
-    // wait for one ms less than delay (due to precision issues)
     const double remainder_s = (double)seconds_per_frame() - seconds;
     // wait 4ms less than actual remainder due to resolution of SDL_Delay
     // (we don't want to delay/sleep too long and get behind)
@@ -353,11 +352,13 @@ void process_graphics_pipeline(model_t* model, const mat34f_t view) {
 }
 
 void update(void) {
-  const double delta_time =
-    seconds_elapsed(g_previous_frame_time, SDL_GetPerformanceCounter());
-  g_previous_frame_time = SDL_GetPerformanceCounter();
-
   wait_to_update();
+
+  const int64_t current_counter = SDL_GetPerformanceCounter();
+  const double delta_time =
+    seconds_elapsed(g_previous_frame_time, current_counter);
+  g_previous_frame_time = current_counter;
+
   calculate_framerate();
 
   update_movement(delta_time);

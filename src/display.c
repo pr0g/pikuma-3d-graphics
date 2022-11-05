@@ -27,8 +27,8 @@ float seconds_per_frame(void) {
 }
 
 double seconds_elapsed(
-  const uint64_t old_counter, const uint64_t current_counter) {
-  return (double)(current_counter - old_counter)
+  const uint64_t previous_counter, const uint64_t current_counter) {
+  return (double)(current_counter - previous_counter)
        / (double)SDL_GetPerformanceFrequency();
 }
 
