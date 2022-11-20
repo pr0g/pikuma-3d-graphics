@@ -2,12 +2,12 @@
 #define POLYGON_H
 
 #include "frustum.h"
-#include "math-types.h"
+#include <as-ops.h>
 #include "texture.h"
 #include "triangle.h"
 
 typedef struct polygon_t {
-  point3f_t* vertices; // array
+  as_point3f* vertices; // array
   tex2f_t* uvs; // array
 } polygon_t;
 

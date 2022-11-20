@@ -8,10 +8,10 @@ struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Texture;
 
-struct point2i_t;
-struct point2f_t;
-struct point3f_t;
-struct rect_t;
+struct as_point2i;
+struct as_point2f;
+struct as_point3f;
+struct as_rect;
 struct projected_triangle_t;
 struct tex2f_t;
 struct texture_t;
@@ -29,12 +29,12 @@ void destroy_color_buffer(void);
 void create_depth_buffer(void);
 void destroy_depth_buffer(void);
 
-void draw_pixel(struct point2i_t point, uint32_t color);
+void draw_pixel(struct as_point2i point, uint32_t color);
 void draw_texel(
-  struct point2i_t point, struct tex2f_t uv, struct texture_t texture);
+  struct as_point2i point, struct tex2f_t uv, struct texture_t texture);
 void draw_grid(int spacing, uint32_t color);
-void draw_rect(struct rect_t rect, uint32_t color);
-void draw_line(struct point2i_t p0, struct point2i_t p1, uint32_t color);
+void draw_rect(struct as_rect rect, uint32_t color);
+void draw_line(struct as_point2i p0, struct as_point2i p1, uint32_t color);
 void draw_wire_triangle(struct projected_triangle_t triangle, uint32_t color);
 void draw_filled_triangle(struct projected_triangle_t triangle, uint32_t color);
 void draw_textured_triangle(
@@ -49,7 +49,7 @@ void renderer_present(void);
 int window_width(void);
 int window_height(void);
 
-struct point2f_t projectf(struct point3f_t point, float fov);
-struct point2i_t projecti(struct point3f_t point, float fov);
+struct as_point2f projectf(struct as_point3f point, float fov);
+struct as_point2i projecti(struct as_point3f point, float fov);
 
 #endif // DISPLAY_H

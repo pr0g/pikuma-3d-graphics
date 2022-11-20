@@ -1,7 +1,7 @@
 #ifndef FRUSTUM_H
 #define FRUSTUM_H
 
-#include "math-types.h"
+#include <as-ops.h>
 
 #define FrustumPlaneCount 6
 
@@ -15,7 +15,7 @@ typedef enum frustum_plane_e {
 } frustum_plane_e;
 
 typedef struct frustum_planes_t {
-  plane_t planes[FrustumPlaneCount];
+  as_plane planes[FrustumPlaneCount];
 } frustum_planes_t;
 
 frustum_planes_t build_frustum_planes(

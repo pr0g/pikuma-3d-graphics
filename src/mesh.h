@@ -1,12 +1,12 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "math-types.h"
+#include <as-ops.h>
 #include "texture.h"
 #include "triangle.h"
 
 typedef struct mesh_t {
-  point3f_t* vertices;
+  as_point3f* vertices;
   tex2f_t* uvs;
   face_t* faces;
 } mesh_t;
@@ -14,9 +14,9 @@ typedef struct mesh_t {
 typedef struct model_t {
   mesh_t mesh;
   texture_t texture;
-  vec3f_t rotation;
-  vec3f_t scale;
-  vec3f_t translation;
+  as_vec3f rotation;
+  as_vec3f scale;
+  as_vec3f translation;
 } model_t;
 
 model_t load_obj_mesh(const char* mesh_path);

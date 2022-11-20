@@ -1,25 +1,26 @@
 #include "camera.h"
 
-mat34f_t camera_transform(const camera_t camera) {
-  const mat33f_t pitch = mat33f_x_rotation_from_float(camera.pitch);
-  const mat33f_t yaw = mat33f_y_rotation_from_float(camera.yaw);
-  return mat34f_multiply_mat34f(
-    mat34f_multiply_mat33f(
-      mat34f_translation_from_point3f(camera.pivot),
-      mat33f_multiply_mat33f(yaw, pitch)),
-    mat34f_translation_from_vec3f(camera.offset));
+as_mat34f camera_transform(const camera_t* camera) {
+  const as_mat33f pitch = as_mat33f_x_rotation_from_float(camera->pitch);
+  const as_mat33f yaw = as_mat33f_y_rotation_from_float(camera->yaw);
+  const as_mat33f pitch_yaw = as_mat33f_multiply_mat33f(&yaw, &pitch);
+  const as_mat34f pivot = as_mat34f_translation_from_point3f(camera->pivot);
+  const as_mat34f pivot_pitch_yaw = as_mat34f_multiply_mat33f(&pivot, &pitch_yaw);
+  const as_mat34f offset = as_mat34f_translation_from_vec3f(camera->offset);
+  return as_mat34f_multiply_mat34f(&pivot_pitch_yaw, &offset);
 }
 
-mat34f_t camera_view(const camera_t camera) {
-  return mat34f_inverse(camera_transform(camera));
+as_mat34f camera_view(const camera_t* camera) {
+  const as_mat34f transform = camera_transform(camera);
+  return as_mat34f_inverse(&transform);
 }
 
-point3f_t camera_position(const camera_t camera) {
-  const mat34f_t transform = camera_transform(camera);
-  return point3f_from_vec3f(vec3f_from_mat34f(transform));
+as_point3f camera_position(const camera_t* camera) {
+  const as_mat34f transform = camera_transform(camera);
+  return as_point3f_from_vec3f(as_vec3f_from_mat34f(&transform));
 }
 
-mat33f_t camera_rotation(const camera_t camera) {
-  const mat34f_t transform = camera_transform(camera);
-  return mat33f_from_mat34f(transform);
+as_mat33f camera_rotation(const camera_t* camera) {
+  const as_mat34f transform = camera_transform(camera);
+  return as_mat33f_from_mat34f(&transform);
 }

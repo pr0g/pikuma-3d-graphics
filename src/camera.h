@@ -1,18 +1,18 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "math-types.h"
+#include <as-ops.h>
 
 typedef struct camera_t {
-  point3f_t pivot;
-  vec3f_t offset;
+  as_point3f pivot;
+  as_vec3f offset;
   float pitch;
   float yaw;
 } camera_t;
 
-mat34f_t camera_transform(camera_t camera);
-mat34f_t camera_view(camera_t camera);
-point3f_t camera_position(camera_t camera);
-mat33f_t camera_rotation(camera_t camera);
+as_mat34f camera_transform(const camera_t* camera);
+as_mat34f camera_view(const camera_t* camera);
+as_point3f camera_position(const camera_t* camera);
+as_mat33f camera_rotation(const camera_t* camera);
 
 #endif // CAMERA_H

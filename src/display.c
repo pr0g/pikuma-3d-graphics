@@ -1,6 +1,6 @@
 #include "display.h"
 
-#include "math-types.h"
+#include <as-ops.h>
 #include "triangle.h"
 
 #include <SDL.h>
@@ -70,7 +70,7 @@ bool initialize_window(void) {
   return true;
 }
 
-void draw_pixel(const point2i_t point, const uint32_t color) {
+void draw_pixel(const as_point2i point, const uint32_t color) {
   if (
     point.x < 0 || point.x >= s_window_width || point.y <= 0
     || point.y >= s_window_height) {
@@ -80,16 +80,16 @@ void draw_pixel(const point2i_t point, const uint32_t color) {
 }
 
 void draw_texel(
-  const point2i_t point, const tex2f_t uv, const texture_t texture) {
+  const as_point2i point, const tex2f_t uv, const texture_t texture) {
   const tex2f_t wrapped_uv = (tex2f_t){
     uv.u - 1.0f > 0.0f ? fmodf(uv.u, 1.0f) : uv.u,
     uv.v - 1.0f > 0.0f ? fmodf(uv.v, 1.0f) : uv.v};
   const tex2f_t clamped_uv = (tex2f_t){
-    clampf(wrapped_uv.u, 0.0f, 1.0f), clampf(wrapped_uv.v, 0.0f, 1.0f)};
-  point2i_t texture_coordinate = point2i_at_proportion_of_size2i(
-    (size2i_t){.width = texture.width, .height = texture.height}, clamped_uv);
-  texture_coordinate.x = clampi(texture_coordinate.x, 0, texture.width - 1);
-  texture_coordinate.y = clampi(texture_coordinate.y, 0, texture.height - 1);
+    as_clampf(wrapped_uv.u, 0.0f, 1.0f), as_clampf(wrapped_uv.v, 0.0f, 1.0f)};
+  as_point2i texture_coordinate = point2i_at_proportion_of_size2i(
+    (as_size2i){.width = texture.width, .height = texture.height}, clamped_uv);
+  texture_coordinate.x = as_clampi(texture_coordinate.x, 0, texture.width - 1);
+  texture_coordinate.y = as_clampi(texture_coordinate.y, 0, texture.height - 1);
   draw_pixel(
     point,
     texture.color_buffer
@@ -110,22 +110,22 @@ void draw_grid(const int spacing, const uint32_t color) {
   }
 }
 
-void draw_rect(const rect_t rect, const uint32_t color) {
+void draw_rect(const as_rect rect, const uint32_t color) {
   for (int y = rect.pos.y; y < rect.pos.y + rect.size.height; ++y) {
     for (int x = rect.pos.x; x < rect.pos.x + rect.size.width; ++x) {
-      draw_pixel((point2i_t){x, y}, color);
+      draw_pixel((as_point2i){x, y}, color);
     }
   }
 }
 
-void draw_line(const point2i_t p0, const point2i_t p1, const uint32_t color) {
-  const vec2i_t delta = point2i_sub_point2i(p1, p0);
-  const int side_length = maxi(abs(delta.x), abs(delta.y));
-  const vec2f_t inc = vec2i_div_scalar(delta, (float)side_length);
-  point2f_t current = point2f_from_point2i(p0);
+void draw_line(const as_point2i p0, const as_point2i p1, const uint32_t color) {
+  const as_vec2i delta = as_point2i_sub_point2i(p1, p0);
+  const int side_length = as_maxi(abs(delta.x), abs(delta.y));
+  const as_vec2f inc = as_vec2i_div_scalar(delta, (float)side_length);
+  as_point2f current = as_point2f_from_point2i(p0);
   for (int i = 0; i <= side_length; ++i) {
-    draw_pixel(point2i_from_point2f(current), color);
-    current = point2f_add_vec2f(current, inc);
+    draw_pixel(as_point2i_from_point2f(current), color);
+    current = as_point2f_add_vec2f(current, inc);
   }
 }
 
@@ -152,7 +152,7 @@ static int compare_projected_vertex(const void* lhs, const void* rhs) {
 }
 
 typedef void (*draw_fn_t)(
-  point2i_t point,
+  as_point2i point,
   projected_vertex_t vert_0,
   projected_vertex_t vert_1,
   projected_vertex_t vert_2,
@@ -164,11 +164,11 @@ static void draw_part_triangle_interpolated(
   const projected_vertex_t vert_0,
   const projected_vertex_t vert_1,
   const projected_vertex_t vert_2,
-  const point2i_t part_begin,
-  const point2i_t part_end,
+  const as_point2i part_begin,
+  const as_point2i part_end,
   draw_fn_t draw_fn,
   const void* const user_data) {
-  const vec2i_t delta = point2i_sub_point2i(part_end, part_begin);
+  const as_vec2i delta = as_point2i_sub_point2i(part_end, part_begin);
   float inv_slope_1 = 0.0f;
   float inv_slope_2 = 0.0f;
   if (delta.y != 0) {
@@ -187,16 +187,16 @@ static void draw_part_triangle_interpolated(
         vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
 
       if (x_end < x_start) {
-        swapi(&x_start, &x_end);
+        as_swapi(&x_start, &x_end);
       }
 
       for (int x = x_start; x <= x_end; x++) {
-        const point2i_t point = (point2i_t){x, y};
+        const as_point2i point = (as_point2i){x, y};
         const barycentric_coords_t barycentric_coords =
           calculate_barycentric_coordinates(
             vert_0.point, vert_1.point, vert_2.point, point);
-        const float w_recip = vec3f_dot_vec3f(
-          (vec3f_t){1.0f / vert_0.w, 1.0f / vert_1.w, 1.0f / vert_2.w},
+        const float w_recip = as_vec3f_dot_vec3f(
+          (as_vec3f){1.0f / vert_0.w, 1.0f / vert_1.w, 1.0f / vert_2.w},
           vec3f_from_barycentric_coords(barycentric_coords));
         const int lookup = point.y * s_window_width + point.x;
         const float inverted_w_recip = 1.0f - w_recip;
@@ -223,7 +223,7 @@ typedef struct filled_triangle_user_data_t {
 } filled_triangle_user_data_t;
 
 static void draw_interpolated_pixel(
-  point2i_t point,
+  as_point2i point,
   projected_vertex_t vert_0,
   projected_vertex_t vert_1,
   projected_vertex_t vert_2,
@@ -271,7 +271,7 @@ typedef struct textured_triangle_user_data_t {
 } textured_triangle_user_data_t;
 
 static void draw_interpolated_texel(
-  point2i_t point,
+  as_point2i point,
   projected_vertex_t vert_0,
   projected_vertex_t vert_1,
   projected_vertex_t vert_2,

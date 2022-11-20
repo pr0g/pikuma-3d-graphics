@@ -8,7 +8,7 @@
 #include <string.h>
 
 model_t load_obj_mesh(const char* mesh_path) {
-  model_t model = (model_t){.scale = (vec3f_t){1.0f, 1.0f, 1.0f}};
+  model_t model = (model_t){.scale = (as_vec3f){1.0f, 1.0f, 1.0f}};
 
   FILE* file = fopen(mesh_path, "r");
 
@@ -21,7 +21,7 @@ model_t load_obj_mesh(const char* mesh_path) {
     if (strncmp(line, "v ", 2) == 0) {
       line += 2;
       char* token = strtok(line, separator);
-      point3f_t vertex = {0};
+      as_point3f vertex = {0};
       float* vertices[] = {[0] = &vertex.x, [1] = &vertex.y, [2] = &vertex.z};
       int i = 0;
       while (token != NULL) {

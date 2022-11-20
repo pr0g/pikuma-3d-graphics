@@ -21,31 +21,31 @@ polygon_t build_polygon_from_uv_triangle(const uv_triangle_t triangle) {
 }
 
 static void clip_polygon_against_plane(
-  polygon_t* polygon, const plane_t plane) {
+  polygon_t* polygon, const as_plane plane) {
   const int vertex_count = array_length(polygon->vertices);
   if (vertex_count == 0) {
     return;
   }
 
-  const point3f_t* current_vertex = &polygon->vertices[0];
-  const point3f_t* previous_vertex = &polygon->vertices[vertex_count - 1];
+  const as_point3f* current_vertex = &polygon->vertices[0];
+  const as_point3f* previous_vertex = &polygon->vertices[vertex_count - 1];
   const tex2f_t* current_uv = &polygon->uvs[0];
   const tex2f_t* previous_uv = &polygon->uvs[vertex_count - 1];
 
-  float previous_dot = vec3f_dot_vec3f(
-    point3f_sub_point3f(*previous_vertex, plane.point), plane.normal);
+  float previous_dot = as_vec3f_dot_vec3f(
+    as_point3f_sub_point3f(*previous_vertex, plane.point), plane.normal);
 
   tex2f_t* inside_uvs = NULL;
-  point3f_t* inside_vertices = NULL;
+  as_point3f* inside_vertices = NULL;
   while (current_vertex
          != &polygon->vertices[array_length(polygon->vertices)]) {
-    const float current_dot = vec3f_dot_vec3f(
-      point3f_sub_point3f(*current_vertex, plane.point), plane.normal);
+    const float current_dot = as_vec3f_dot_vec3f(
+      as_point3f_sub_point3f(*current_vertex, plane.point), plane.normal);
     // if we changed from inside to outside
     if (current_dot * previous_dot < 0.0f) {
       const float t = previous_dot / (previous_dot - current_dot);
-      const point3f_t intersection_point =
-        point3f_mix(*previous_vertex, *current_vertex, t);
+      const as_point3f intersection_point =
+        as_point3f_mix(*previous_vertex, *current_vertex, t);
       const tex2f_t intersection_uv = tex2f_mix(*previous_uv, *current_uv, t);
       array_push(inside_vertices, intersection_point);
       array_push(inside_uvs, intersection_uv);

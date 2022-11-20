@@ -4,11 +4,11 @@
 #include "fps.h"
 #include "frustum.h"
 #include "lighting.h"
-#include "math-types.h"
 #include "mesh.h"
 #include "polygon.h"
 #include "texture.h"
 #include "upng/upng.h"
+#include <as-ops.h>
 
 #include <SDL.h>
 
@@ -42,10 +42,10 @@ uint64_t g_previous_frame_time = 0;
 Fps g_fps = {.head_ = 0, .tail_ = FpsMaxSamples - 1};
 display_mode_e g_display_mode = display_mode_textured;
 bool g_backface_culling = true;
-mat44f_t g_perspective_projection;
+as_mat44f g_perspective_projection;
 frustum_planes_t g_frustum_planes;
-const vec3f_t g_light_direction = {.z = -0.5f, .y = -0.5f};
-point2i_t g_mouse_position = {0};
+const as_vec3f g_light_direction = {.z = -0.5f, .y = -0.5f};
+as_point2i g_mouse_position = {0};
 bool g_mouse_down = false;
 int8_t g_movement = 0;
 model_t* g_models = NULL;
@@ -56,35 +56,35 @@ void setup(void) {
   create_color_buffer();
   create_depth_buffer();
   const float aspect_ratio = (float)window_width() / (float)window_height();
-  const float vertical_fov = radians_from_degrees(60.0f);
+  const float vertical_fov = as_radians_from_degrees(60.0f);
   const float near = 0.1f;
   const float far = 100.0f;
   g_perspective_projection =
-    mat44f_perspective_projection(aspect_ratio, vertical_fov, near, far);
+    as_mat44f_perspective_projection(aspect_ratio, vertical_fov, near, far);
   g_frustum_planes =
     build_frustum_planes(aspect_ratio, vertical_fov, near, far);
 
   {
     model_t model =
       load_obj_mesh_with_png_texture("assets/efa.obj", "assets/efa.png");
-    model.translation = (vec3f_t){.x = 2.0f, .y = 0.2f, .z = -18.0f};
-    model.rotation = (vec3f_t){.y = -k_pi * 0.5f};
+    model.translation = (as_vec3f){.x = 2.0f, .y = 0.2f, .z = -18.0f};
+    model.rotation = (as_vec3f){.y = -as_k_pi * 0.5f};
     array_push(g_models, model);
   }
 
   {
     model_t model =
       load_obj_mesh_with_png_texture("assets/f22.obj", "assets/f22.png");
-    model.translation = (vec3f_t){.x = -2.0f, .y = 0.2f, .z = -18.0f};
-    model.rotation = (vec3f_t){.y = -k_pi * 0.5f};
+    model.translation = (as_vec3f){.x = -2.0f, .y = 0.2f, .z = -18.0f};
+    model.rotation = (as_vec3f){.y = -as_k_pi * 0.5f};
     array_push(g_models, model);
   }
 
   {
     model_t model =
       load_obj_mesh_with_png_texture("assets/f117.obj", "assets/f117.png");
-    model.translation = (vec3f_t){.y = 0.2f, .z = -14.0f};
-    model.rotation = (vec3f_t){.y = -k_pi * 0.5f};
+    model.translation = (as_vec3f){.y = 0.2f, .z = -14.0f};
+    model.rotation = (as_vec3f){.y = -as_k_pi * 0.5f};
     array_push(g_models, model);
   }
 
@@ -94,10 +94,10 @@ void setup(void) {
     array_push(g_models, model);
   }
 
-  g_camera.pitch = radians_from_degrees(20.0f);
-  g_camera.yaw = radians_from_degrees(160.0f);
-  g_camera.pivot = (point3f_t){.x = -2.0f, .y = 2.5f, .z = -10.0f};
-  g_camera.offset = (vec3f_t){.z = 0.0f};
+  g_camera.pitch = as_radians_from_degrees(20.0f);
+  g_camera.yaw = as_radians_from_degrees(160.0f);
+  g_camera.pivot = (as_point3f){.x = -2.0f, .y = 2.5f, .z = -10.0f};
+  g_camera.offset = (as_vec3f){.z = 0.0f};
 }
 
 bool process_input(void) {
@@ -108,12 +108,12 @@ bool process_input(void) {
       case SDL_MOUSEMOTION: {
         const SDL_MouseMotionEvent* mouse_motion_event =
           (const SDL_MouseMotionEvent*)&event;
-        const point2i_t previous_mouse_position = g_mouse_position;
+        const as_point2i previous_mouse_position = g_mouse_position;
         g_mouse_position =
-          (point2i_t){.x = mouse_motion_event->x, .y = mouse_motion_event->y};
+          (as_point2i){.x = mouse_motion_event->x, .y = mouse_motion_event->y};
         if (g_mouse_down) {
-          const vec2i_t mouse_delta =
-            point2i_sub_point2i(g_mouse_position, previous_mouse_position);
+          const as_vec2i mouse_delta =
+            as_point2i_sub_point2i(g_mouse_position, previous_mouse_position);
           g_camera.pitch += mouse_delta.y * 0.01f;
           g_camera.yaw += mouse_delta.x * 0.01f;
         }
@@ -218,50 +218,63 @@ void calculate_framerate(void) {
 static void update_movement(const float delta_time) {
   const float speed = delta_time * 10.0f;
   if ((g_movement & movement_forward) != 0) {
-    const mat33f_t rotation = camera_rotation(g_camera);
-    g_camera.pivot = point3f_add_vec3f(
-      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.z = speed}));
+    const as_mat33f rotation = camera_rotation(&g_camera);
+    g_camera.pivot = as_point3f_add_vec3f(
+      g_camera.pivot,
+      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.z = speed}));
   }
   if ((g_movement & movement_left) != 0) {
-    const mat33f_t rotation = camera_rotation(g_camera);
-    g_camera.pivot = point3f_add_vec3f(
-      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.x = -speed}));
+    const as_mat33f rotation = camera_rotation(&g_camera);
+    g_camera.pivot = as_point3f_add_vec3f(
+      g_camera.pivot,
+      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.x = -speed}));
   }
   if ((g_movement & movement_backward) != 0) {
-    const mat33f_t rotation = camera_rotation(g_camera);
-    g_camera.pivot = point3f_add_vec3f(
-      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.z = -speed}));
+    const as_mat33f rotation = camera_rotation(&g_camera);
+    g_camera.pivot = as_point3f_add_vec3f(
+      g_camera.pivot,
+      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.z = -speed}));
   }
   if ((g_movement & movement_right) != 0) {
-    const mat33f_t rotation = camera_rotation(g_camera);
-    g_camera.pivot = point3f_add_vec3f(
-      g_camera.pivot, mat33f_multiply_vec3f(rotation, (vec3f_t){.x = speed}));
+    const as_mat33f rotation = camera_rotation(&g_camera);
+    g_camera.pivot = as_point3f_add_vec3f(
+      g_camera.pivot,
+      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.x = speed}));
   }
   if ((g_movement & movement_down) != 0) {
-    g_camera.pivot = point3f_add_vec3f(g_camera.pivot, (vec3f_t){.y = -speed});
+    g_camera.pivot =
+      as_point3f_add_vec3f(g_camera.pivot, (as_vec3f){.y = -speed});
   }
   if ((g_movement & movement_up) != 0) {
-    g_camera.pivot = point3f_add_vec3f(g_camera.pivot, (vec3f_t){.y = speed});
+    g_camera.pivot =
+      as_point3f_add_vec3f(g_camera.pivot, (as_vec3f){.y = speed});
   }
 }
 
-void process_graphics_pipeline(model_t* model, const mat34f_t view) {
+void process_graphics_pipeline(model_t* model, const as_mat34f view) {
   g_projected_model_count++;
   if (array_length(g_projected_models) < g_projected_model_count) {
     array_push(g_projected_models, (projected_model_t){0});
   }
 
-  const mat33f_t scale = mat33f_scale_from_vec3f(model->scale);
-  const mat34f_t translation =
-    mat34f_translation_from_vec3f(model->translation);
-  const mat33f_t rotation_x = mat33f_x_rotation_from_float(model->rotation.x);
-  const mat33f_t rotation_y = mat33f_y_rotation_from_float(model->rotation.y);
-  const mat33f_t rotation_z = mat33f_z_rotation_from_float(model->rotation.z);
+  const as_mat33f scale = as_mat33f_scale_from_vec3f(model->scale);
+  const as_mat34f translation =
+    as_mat34f_translation_from_vec3f(model->translation);
+  const as_mat33f rotation_x =
+    as_mat33f_x_rotation_from_float(model->rotation.x);
+  const as_mat33f rotation_y =
+    as_mat33f_y_rotation_from_float(model->rotation.y);
+  const as_mat33f rotation_z =
+    as_mat33f_z_rotation_from_float(model->rotation.z);
 
-  const mat33f_t rotation = mat33f_multiply_mat33f(
-    rotation_z, mat33f_multiply_mat33f(rotation_y, rotation_x));
-  const mat34f_t model_transform = mat34f_multiply_mat33f(
-    mat34f_multiply_mat33f(translation, rotation), scale);
+  const as_mat33f rotation_yx =
+    as_mat33f_multiply_mat33f(&rotation_y, &rotation_x);
+  const as_mat33f rotation =
+    as_mat33f_multiply_mat33f(&rotation_z, &rotation_yx);
+  const as_mat34f translation_rotation =
+    as_mat34f_multiply_mat33f(&translation, &rotation);
+  const as_mat34f model_transform =
+    as_mat34f_multiply_mat33f(&translation_rotation, &scale);
 
   projected_model_t* projected_model =
     &g_projected_models[g_projected_model_count - 1];
@@ -271,7 +284,7 @@ void process_graphics_pipeline(model_t* model, const mat34f_t view) {
        face_index < face_count;
        ++face_index) {
     const face_t mesh_face = model->mesh.faces[face_index];
-    const point3f_t face_vertices[] = {
+    const as_point3f face_vertices[] = {
       model->mesh.vertices[mesh_face.vert_indices[0] - 1],
       model->mesh.vertices[mesh_face.vert_indices[1] - 1],
       model->mesh.vertices[mesh_face.vert_indices[2] - 1]};
@@ -279,19 +292,21 @@ void process_graphics_pipeline(model_t* model, const mat34f_t view) {
     // model -> view transform
     uv_triangle_t transformed_triangle;
     for (int v = 0; v < 3; ++v) {
-      transformed_triangle.triangle.vertices[v] = mat34f_multiply_point3f(
-        view, mat34f_multiply_point3f(model_transform, face_vertices[v]));
+      const as_point3f world_position =
+        as_mat34f_multiply_point3f(&model_transform, face_vertices[v]);
+      transformed_triangle.triangle.vertices[v] =
+        as_mat34f_multiply_point3f(&view, world_position);
       transformed_triangle.uvs[v] =
         model->mesh.uvs[mesh_face.uv_indices[v] - 1];
     }
 
     // backface culling
-    const vec3f_t normal =
+    const as_vec3f normal =
       calculate_triangle_normal(transformed_triangle.triangle);
     if (g_backface_culling) {
-      const vec3f_t camera_direction = point3f_sub_point3f(
-        (point3f_t){0}, transformed_triangle.triangle.vertices[0]);
-      const float view_dot = vec3f_dot_vec3f(normal, camera_direction);
+      const as_vec3f camera_direction = as_point3f_sub_point3f(
+        (as_point3f){0}, transformed_triangle.triangle.vertices[0]);
+      const float view_dot = as_vec3f_dot_vec3f(normal, camera_direction);
       if (view_dot < 0.0f) {
         continue;
       }
@@ -310,8 +325,8 @@ void process_graphics_pipeline(model_t* model, const mat34f_t view) {
       projected_triangle_t projected_triangle = {
         .color = apply_light_intensity(
           0xffffff,
-          -vec3f_dot_vec3f(
-            normal, mat34f_multiply_vec3f(view, g_light_direction))),
+          -as_vec3f_dot_vec3f(
+            normal, as_mat34f_multiply_vec3f(&view, g_light_direction))),
         .vertices = {
           {.uv = clipped_triangles[t].uvs[0]},
           {.uv = clipped_triangles[t].uvs[1]},
@@ -319,18 +334,18 @@ void process_graphics_pipeline(model_t* model, const mat34f_t view) {
 
       for (int v = 0; v < 3; ++v) {
         // projection and perspective divide
-        const point4f_t projected_point = mat44f_project_point3f(
-          g_perspective_projection, clipped_triangles[t].triangle.vertices[v]);
+        const as_point4f projected_point = as_mat44f_project_point3f(
+          &g_perspective_projection, clipped_triangles[t].triangle.vertices[v]);
 
-        const point2f_t projected_point_2d = mat22f_multiply_point2f(
-          mat22f_scale_from_floats(
-            (float)window_width() / 2.0f, (float)window_height() / -2.0f),
-          point2f_from_point4f(projected_point));
+        const as_mat22f window_scale = as_mat22f_scale_from_floats(
+          (float)window_width() / 2.0f, (float)window_height() / -2.0f);
+        const as_point2f projected_point_2d = as_mat22f_multiply_point2f(
+          &window_scale, as_point2f_from_point4f(projected_point));
 
         // convert to screen space
-        projected_triangle.vertices[v].point = point2i_add_vec2i(
-          point2i_from_point2f(projected_point_2d),
-          (vec2i_t){window_width() / 2, window_height() / 2});
+        projected_triangle.vertices[v].point = as_point2i_add_vec2i(
+          as_point2i_from_point2f(projected_point_2d),
+          (as_vec2i){window_width() / 2, window_height() / 2});
         projected_triangle.vertices[v].z = projected_point.z;
         projected_triangle.vertices[v].w = projected_point.w;
       }
@@ -363,7 +378,7 @@ void update(void) {
 
   update_movement(delta_time);
 
-  const mat34f_t view = camera_view(g_camera);
+  const as_mat34f view = camera_view(&g_camera);
   g_projected_model_count = 0;
   const int model_count = array_length(g_models);
   for (int m = 0; m < model_count; m++) {
@@ -398,12 +413,12 @@ void render(void) {
           draw_wire_triangle(
             projected_model->projected_triangles[i], 0xff00ffff);
           for (int p = 0; p < 3; ++p) {
-            const point2i_t point =
+            const as_point2i point =
               projected_model->projected_triangles[i].vertices[p].point;
             draw_rect(
-              (rect_t){
-                (point2i_t){.x = point.x - 2, .y = point.y - 2},
-                (size2i_t){.width = 5, .height = 5}},
+              (as_rect){
+                (as_point2i){.x = point.x - 2, .y = point.y - 2},
+                (as_size2i){.width = 5, .height = 5}},
               0xffffffff);
           }
         } break;

@@ -1,13 +1,13 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include "math-types.h"
+#include <as-ops.h>
 #include "texture.h"
 
 #include <stdint.h>
 
 typedef struct triangle_t {
-  point3f_t vertices[3];
+  as_point3f vertices[3];
 } triangle_t;
 
 typedef struct uv_triangle_t {
@@ -21,7 +21,7 @@ typedef struct face_t {
 } face_t;
 
 typedef struct projected_vertex_t {
-  point2i_t point;
+  as_point2i point;
   float z;
   float w;
   tex2f_t uv;
@@ -32,6 +32,6 @@ typedef struct projected_triangle_t {
   uint32_t color;
 } projected_triangle_t;
 
-vec3f_t calculate_triangle_normal(triangle_t triangle);
+as_vec3f calculate_triangle_normal(triangle_t triangle);
 
 #endif // TRIANGLE_H
