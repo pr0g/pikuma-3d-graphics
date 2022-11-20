@@ -1,9 +1,9 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include <as-ops.h>
 #include "texture.h"
 
+#include <as-ops.h>
 #include <stdint.h>
 
 typedef struct triangle_t {

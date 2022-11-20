@@ -1,9 +1,9 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include <as-ops.h>
 #include "upng/upng.h"
 
+#include <as-ops.h>
 #include <stdint.h>
 
 struct projected_triangle_t;

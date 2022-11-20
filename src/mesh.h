@@ -1,9 +1,10 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <as-ops.h>
 #include "texture.h"
 #include "triangle.h"
+
+#include <as-ops.h>
 
 typedef struct mesh_t {
   as_point3f* vertices;

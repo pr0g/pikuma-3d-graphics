@@ -2,9 +2,10 @@
 #define POLYGON_H
 
 #include "frustum.h"
-#include <as-ops.h>
 #include "texture.h"
 #include "triangle.h"
+
+#include <as-ops.h>
 
 typedef struct polygon_t {
   as_point3f* vertices; // array
