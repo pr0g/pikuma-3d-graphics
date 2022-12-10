@@ -1,7 +1,7 @@
 #include "display.h"
 
-#include <as-ops.h>
 #include "triangle.h"
+#include <as-ops.h>
 
 #include <SDL.h>
 
@@ -195,14 +195,17 @@ static void draw_part_triangle_interpolated(
         const barycentric_coords_t barycentric_coords =
           calculate_barycentric_coordinates(
             vert_0.point, vert_1.point, vert_2.point, point);
-        const float w_recip = as_vec3f_dot_vec3f(
-          (as_vec3f){1.0f / vert_0.w, 1.0f / vert_1.w, 1.0f / vert_2.w},
-          vec3f_from_barycentric_coords(barycentric_coords));
+        const as_vec3f vec3f_barycentric =
+          vec3f_from_barycentric_coords(barycentric_coords);
+        const float depth = as_vec3f_dot_vec3f(
+          (as_vec3f){vert_0.z, vert_1.z, vert_2.z}, vec3f_barycentric);
         const int lookup = point.y * s_window_width + point.x;
-        const float inverted_w_recip = 1.0f - w_recip;
         if (
           lookup < s_window_width * s_window_height
-          && inverted_w_recip < s_depth_buffer[lookup]) {
+          && depth < s_depth_buffer[lookup]) {
+          const float w_recip = as_vec3f_dot_vec3f(
+            (as_vec3f){1.0f / vert_0.w, 1.0f / vert_1.w, 1.0f / vert_2.w},
+            vec3f_barycentric);
           draw_fn(
             point,
             vert_0,
@@ -211,7 +214,7 @@ static void draw_part_triangle_interpolated(
             barycentric_coords,
             w_recip,
             user_data);
-          s_depth_buffer[lookup] = inverted_w_recip;
+          s_depth_buffer[lookup] = depth;
         }
       }
     }
