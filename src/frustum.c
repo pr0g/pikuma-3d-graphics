@@ -13,19 +13,21 @@ frustum_planes_t build_frustum_planes(
   return (frustum_planes_t){
     .planes = {
       [frustum_plane_left] =
-        {.normal = as_vec3f_rotate_y(as_vec3f_x_axis(), half_horizontal_fov)},
+        {.normal =
+           as_vec3f_rotate_y_axis(as_vec3f_x_axis(), -half_horizontal_fov)},
       [frustum_plane_right] =
-        {.normal = as_vec3f_rotate_y(
-           as_vec3f_mul_scalar(as_vec3f_x_axis(), -1.0f), -half_horizontal_fov)},
+        {.normal = as_vec3f_rotate_y_axis(
+           as_vec3f_mul_float(as_vec3f_x_axis(), -1.0f), half_horizontal_fov)},
       [frustum_plane_top] =
-        {.normal = as_vec3f_rotate_x(
-           as_vec3f_mul_scalar(as_vec3f_y_axis(), -1.0f), -half_vertical_fov)},
+        {.normal = as_vec3f_rotate_x_axis(
+           as_vec3f_mul_float(as_vec3f_y_axis(), -1.0f), -half_vertical_fov)},
       [frustum_plane_bottom] =
-        {.normal = as_vec3f_rotate_x(as_vec3f_y_axis(), half_vertical_fov)},
+        {.normal =
+           as_vec3f_rotate_x_axis(as_vec3f_y_axis(), half_vertical_fov)},
       [frustum_plane_near] =
         {.normal = as_vec3f_z_axis(), .point = (as_point3f){.z = near}},
       [frustum_plane_far] =
-        {.normal = as_vec3f_mul_scalar(as_vec3f_z_axis(), -1.0f),
+        {.normal = as_vec3f_mul_float(as_vec3f_z_axis(), -1.0f),
          .point = (as_point3f){.z = far}},
     }};
 }

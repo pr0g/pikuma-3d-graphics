@@ -60,7 +60,7 @@ void setup(void) {
   const float near = 0.1f;
   const float far = 100.0f;
   g_perspective_projection =
-    as_mat44f_perspective_projection(aspect_ratio, vertical_fov, near, far);
+    as_mat44f_perspective_projection_lh(aspect_ratio, vertical_fov, near, far);
   g_frustum_planes =
     build_frustum_planes(aspect_ratio, vertical_fov, near, far);
 
@@ -221,25 +221,25 @@ static void update_movement(const float delta_time) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
       g_camera.pivot,
-      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.z = speed}));
+      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.z = speed}));
   }
   if ((g_movement & movement_left) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
       g_camera.pivot,
-      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.x = -speed}));
+      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.x = -speed}));
   }
   if ((g_movement & movement_backward) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
       g_camera.pivot,
-      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.z = -speed}));
+      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.z = -speed}));
   }
   if ((g_movement & movement_right) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
       g_camera.pivot,
-      as_mat33f_multiply_vec3f(&rotation, (as_vec3f){.x = speed}));
+      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.x = speed}));
   }
   if ((g_movement & movement_down) != 0) {
     g_camera.pivot =
@@ -260,21 +260,16 @@ void process_graphics_pipeline(model_t* model, const as_mat34f view) {
   const as_mat33f scale = as_mat33f_scale_from_vec3f(model->scale);
   const as_mat34f translation =
     as_mat34f_translation_from_vec3f(model->translation);
-  const as_mat33f rotation_x =
-    as_mat33f_x_rotation_from_float(model->rotation.x);
-  const as_mat33f rotation_y =
-    as_mat33f_y_rotation_from_float(model->rotation.y);
-  const as_mat33f rotation_z =
-    as_mat33f_z_rotation_from_float(model->rotation.z);
+  const as_mat33f rotation_x = as_mat33f_x_axis_rotation(model->rotation.x);
+  const as_mat33f rotation_y = as_mat33f_y_axis_rotation(model->rotation.y);
+  const as_mat33f rotation_z = as_mat33f_z_axis_rotation(model->rotation.z);
 
-  const as_mat33f rotation_yx =
-    as_mat33f_multiply_mat33f(&rotation_y, &rotation_x);
-  const as_mat33f rotation =
-    as_mat33f_multiply_mat33f(&rotation_z, &rotation_yx);
+  const as_mat33f rotation_yx = as_mat33f_mul_mat33f(&rotation_y, &rotation_x);
+  const as_mat33f rotation = as_mat33f_mul_mat33f(&rotation_z, &rotation_yx);
   const as_mat34f translation_rotation =
-    as_mat34f_multiply_mat33f(&translation, &rotation);
+    as_mat34f_mul_mat33f(&translation, &rotation);
   const as_mat34f model_transform =
-    as_mat34f_multiply_mat33f(&translation_rotation, &scale);
+    as_mat34f_mul_mat33f(&translation_rotation, &scale);
 
   projected_model_t* projected_model =
     &g_projected_models[g_projected_model_count - 1];
@@ -293,9 +288,9 @@ void process_graphics_pipeline(model_t* model, const as_mat34f view) {
     uv_triangle_t transformed_triangle;
     for (int v = 0; v < 3; ++v) {
       const as_point3f world_position =
-        as_mat34f_multiply_point3f(&model_transform, face_vertices[v]);
+        as_mat34f_mul_point3f(&model_transform, face_vertices[v]);
       transformed_triangle.triangle.vertices[v] =
-        as_mat34f_multiply_point3f(&view, world_position);
+        as_mat34f_mul_point3f(&view, world_position);
       transformed_triangle.uvs[v] =
         model->mesh.uvs[mesh_face.uv_indices[v] - 1];
     }
@@ -326,7 +321,7 @@ void process_graphics_pipeline(model_t* model, const as_mat34f view) {
         .color = apply_light_intensity(
           0xffffff,
           -as_vec3f_dot_vec3f(
-            normal, as_mat34f_multiply_vec3f(&view, g_light_direction))),
+            normal, as_mat34f_mul_vec3f(&view, g_light_direction))),
         .vertices = {
           {.uv = clipped_triangles[t].uvs[0]},
           {.uv = clipped_triangles[t].uvs[1]},
@@ -339,7 +334,7 @@ void process_graphics_pipeline(model_t* model, const as_mat34f view) {
 
         const as_mat22f window_scale = as_mat22f_scale_from_floats(
           (float)window_width() / 2.0f, (float)window_height() / -2.0f);
-        const as_point2f projected_point_2d = as_mat22f_multiply_point2f(
+        const as_point2f projected_point_2d = as_mat22f_mul_point2f(
           &window_scale, as_point2f_from_point4f(projected_point));
 
         // convert to screen space

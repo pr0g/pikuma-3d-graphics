@@ -85,11 +85,14 @@ void draw_texel(
     uv.u - 1.0f > 0.0f ? fmodf(uv.u, 1.0f) : uv.u,
     uv.v - 1.0f > 0.0f ? fmodf(uv.v, 1.0f) : uv.v};
   const tex2f_t clamped_uv = (tex2f_t){
-    as_clampf(wrapped_uv.u, 0.0f, 1.0f), as_clampf(wrapped_uv.v, 0.0f, 1.0f)};
+    as_clamp_float(wrapped_uv.u, 0.0f, 1.0f),
+    as_clamp_float(wrapped_uv.v, 0.0f, 1.0f)};
   as_point2i texture_coordinate = point2i_at_proportion_of_size2i(
     (as_size2i){.width = texture.width, .height = texture.height}, clamped_uv);
-  texture_coordinate.x = as_clampi(texture_coordinate.x, 0, texture.width - 1);
-  texture_coordinate.y = as_clampi(texture_coordinate.y, 0, texture.height - 1);
+  texture_coordinate.x =
+    as_clamp_int(texture_coordinate.x, 0, texture.width - 1);
+  texture_coordinate.y =
+    as_clamp_int(texture_coordinate.y, 0, texture.height - 1);
   draw_pixel(
     point,
     texture.color_buffer
@@ -120,8 +123,8 @@ void draw_rect(const as_rect rect, const uint32_t color) {
 
 void draw_line(const as_point2i p0, const as_point2i p1, const uint32_t color) {
   const as_vec2i delta = as_point2i_sub_point2i(p1, p0);
-  const int side_length = as_maxi(abs(delta.x), abs(delta.y));
-  const as_vec2f inc = as_vec2i_div_scalar(delta, (float)side_length);
+  const int side_length = as_max_int(abs(delta.x), abs(delta.y));
+  const as_vec2f inc = as_vec2i_div_float(delta, (float)side_length);
   as_point2f current = as_point2f_from_point2i(p0);
   for (int i = 0; i <= side_length; ++i) {
     draw_pixel(as_point2i_from_point2f(current), color);
@@ -187,7 +190,7 @@ static void draw_part_triangle_interpolated(
         vert_0.point.x + (int)((float)(y - vert_0.point.y) * inv_slope_2);
 
       if (x_end < x_start) {
-        as_swapi(&x_start, &x_end);
+        as_swap_int(&x_start, &x_end);
       }
 
       for (int x = x_start; x <= x_end; x++) {

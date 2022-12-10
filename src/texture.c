@@ -4,7 +4,8 @@
 #include <stdio.h>
 
 tex2f_t tex2f_mix(const tex2f_t begin, const tex2f_t end, const float t) {
-  return (tex2f_t){.u = as_mixf(begin.u, end.u, t), .v = as_mixf(begin.v, end.v, t)};
+  return (tex2f_t){
+    .u = as_mix_float(begin.u, end.u, t), .v = as_mix_float(begin.v, end.v, t)};
 }
 
 tex2f_t tex2f_div_scalar(const tex2f_t tex, const float scale) {
@@ -20,7 +21,10 @@ as_vec3f vec3f_from_barycentric_coords(
 }
 
 barycentric_coords_t calculate_barycentric_coordinates(
-  const as_point2i a, const as_point2i b, const as_point2i c, const as_point2i p) {
+  const as_point2i a,
+  const as_point2i b,
+  const as_point2i c,
+  const as_point2i p) {
   const as_vec2i ab = as_point2i_sub_point2i(b, a);
   const as_vec2i bc = as_point2i_sub_point2i(c, b);
   const as_vec2i ac = as_point2i_sub_point2i(c, a);
