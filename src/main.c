@@ -7,8 +7,9 @@
 #include "mesh.h"
 #include "polygon.h"
 #include "texture.h"
-#include "upng/upng.h"
+
 #include <as-ops.h>
+#include <upng.h>
 
 #include <SDL.h>
 

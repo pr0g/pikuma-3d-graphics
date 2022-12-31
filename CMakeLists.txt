@@ -13,8 +13,12 @@ FetchContent_Declare(
   as-c-math
   GIT_REPOSITORY https://github.com/pr0g/as-c-math.git
   GIT_TAG 7d9786335b0049ec9d6cd3622c7510360255b6f3)
+FetchContent_Declare(
+  upng
+  GIT_REPOSITORY https://github.com/pr0g/upng.git
+  GIT_TAG edb284b15fc3c37260d27182e4cf3a366c1734bf)
 
-FetchContent_MakeAvailable(SDL2 as-c-math)
+FetchContent_MakeAvailable(SDL2 as-c-math upng)
 
 add_executable(${PROJECT_NAME})
 target_sources(
@@ -29,8 +33,7 @@ target_sources(
           src/texture.c
           src/camera.c
           src/frustum.c
-          src/polygon.c
-          third-party/upng/upng.c)
+          src/polygon.c)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 target_compile_options(
   ${PROJECT_NAME}
@@ -44,8 +47,7 @@ target_compile_options(
           -Wextra
           -pedantic>)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2::SDL2main
-                                              as-c-math)
-target_include_directories(${PROJECT_NAME} PRIVATE third-party)
+                                              as-c-math upng)
 
 add_custom_target(
   run
