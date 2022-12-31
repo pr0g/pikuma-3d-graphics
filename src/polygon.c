@@ -97,7 +97,9 @@ uv_triangle_t* uv_triangles_from_polygon(const polygon_t polygon) {
     const uv_triangle_t uv_triangle = (uv_triangle_t){
       .triangle = triangles[v],
       .uvs = {
-        [0] = polygon.uvs[0], [1] = polygon.uvs[v + 1], [2] = polygon.uvs[v + 2]}};
+        [0] = polygon.uvs[0],
+        [1] = polygon.uvs[v + 1],
+        [2] = polygon.uvs[v + 2]}};
     array_push(uv_triangles, uv_triangle);
   }
   array_free(triangles);

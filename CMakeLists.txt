@@ -12,7 +12,7 @@ FetchContent_Declare(
 FetchContent_Declare(
   as-c-math
   GIT_REPOSITORY https://github.com/pr0g/as-c-math.git
-  GIT_TAG 844c217213ae011b6a538f25a39167f78c180fd6)
+  GIT_TAG 7d9786335b0049ec9d6cd3622c7510360255b6f3)
 
 FetchContent_MakeAvailable(SDL2 as-c-math)
 

@@ -60,7 +60,8 @@ void setup(void) {
   const float near = 0.1f;
   const float far = 100.0f;
   g_perspective_projection =
-    as_mat44f_perspective_projection_lh(aspect_ratio, vertical_fov, near, far);
+    as_mat44f_perspective_projection_depth_zero_to_one_lh(
+      aspect_ratio, vertical_fov, near, far);
   g_frustum_planes =
     build_frustum_planes(aspect_ratio, vertical_fov, near, far);
 
@@ -220,26 +221,22 @@ static void update_movement(const float delta_time) {
   if ((g_movement & movement_forward) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
-      g_camera.pivot,
-      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.z = speed}));
+      g_camera.pivot, as_mat33f_mul_vec3f(&rotation, (as_vec3f){.z = speed}));
   }
   if ((g_movement & movement_left) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
-      g_camera.pivot,
-      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.x = -speed}));
+      g_camera.pivot, as_mat33f_mul_vec3f(&rotation, (as_vec3f){.x = -speed}));
   }
   if ((g_movement & movement_backward) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
-      g_camera.pivot,
-      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.z = -speed}));
+      g_camera.pivot, as_mat33f_mul_vec3f(&rotation, (as_vec3f){.z = -speed}));
   }
   if ((g_movement & movement_right) != 0) {
     const as_mat33f rotation = camera_rotation(&g_camera);
     g_camera.pivot = as_point3f_add_vec3f(
-      g_camera.pivot,
-      as_mat33f_mul_vec3f(&rotation, (as_vec3f){.x = speed}));
+      g_camera.pivot, as_mat33f_mul_vec3f(&rotation, (as_vec3f){.x = speed}));
   }
   if ((g_movement & movement_down) != 0) {
     g_camera.pivot =
